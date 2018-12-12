@@ -1,0 +1,91 @@
+\documentclass[a4paper,oneside]{article}
+
+%\usepackage[french]{babel}
+%\usepackage[utf8]{inputenc}
+%\usepackage[T1]{fontenc}
+\usepackage{subcaption}
+\usepackage{graphicx}
+\graphicspath{{./fig/}}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{mathtools}
+\usepackage{verbatim}
+\usepackage{epstopdf}
+\usepackage[colorlinks,bookmarks=false,citecolor=black,linkcolor=blue,urlcolor=blue]{hyperref}
+\hypersetup{%
+  colorlinks = true,
+  linkcolor  = black
+}
+\usepackage{wrapfig}
+\usepackage{enumitem}
+%\usepackage{siunitx}
+\usepackage{nameref}
+%\usepackage{cite}
+\usepackage{setspace}
+\usepackage[square]{natbib}
+\setcitestyle{numbers}
+\usepackage{braket}
+
+\paperheight=297mm
+\paperwidth=210mm
+
+\setlength{\textheight}{235mm}
+\setlength{\topmargin}{-1.2cm} % pour centrer la page verticalement
+%\setlength{\footskip}{5mm}
+\setlength{\textwidth}{15cm}
+
+\setlength{\oddsidemargin}{0.56cm}
+\setlength{\evensidemargin}{0.56cm}
+ 
+\pagestyle{plain}
+
+
+% quelques abreviations utiles
+\def \be {\begin{equation}}
+\def \ee {\end{equation}}
+\def \dd  {{\rm d}}
+
+\newcommand{\mail}[1]{{\href{mailto:#1}{#1}}}
+\newcommand{\ftplink}[1]{{\href{ftp://#1}{#1}}}
+\newcommand{\fracOne}[1]{\frac{1}{#1}}
+\newcommand{\diff}[1]{\mathrm{d}#1}
+\newcommand{\grad}{\vec{\nabla}}
+\newcommand{\abs}[1]{\left| #1 \right|}
+\newcommand{\abssq}[1]{\abs{#1}^2}
+\newcommand{\matr}[1]{{#1}}
+\newcommand{\norm}[1]{\left\lVert#1\right\rVert}
+\newcommand{\trace}[1]{\mathrm{Tr}(#1)}
+\newcommand{\fpartial}[2]{\frac{\partial #1}{\partial #2}}
+
+\begin{document}
+% Le titre, l'auteur et la date
+\title{\Huge Titre\\
+		\huge titre\\ }
+\date{\today}
+\author{Nicolas Rime\\
+{\small	\mail{n.rime@hotmail.com}}}
+\maketitle
+%\tableofcontents % Table des matieres
+
+% Quelques options pour les espacements entre lignes, l'identation 
+% des nouveaux paragraphes, et l'espacement entre paragraphes
+\baselineskip=16pt
+\parindent=15pt
+\parskip=5pt
+
+%\vspace{-30pt}
+%\newpage
+%% For corrections, add doublespacing
+%\doublespacing
+\section{Introduction}
+
+  
+
+%\newpage
+%\nocite{*}
+\bibliographystyle{ieeetr}
+%\bibliographystyle{plainnat}
+\bibliography{references}
+
+\end{document}
+
