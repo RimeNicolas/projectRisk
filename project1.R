@@ -1,5 +1,5 @@
-install.packages("evd");install.packages("evdbayes");install.packages("coda")
-library(evd);library(evdbayes);library(coda)
+install.packages("evd");install.packages("evdbayes");install.packages("coda");install.packages("ismev")
+library(evd);library(evdbayes);library(coda);library(ismev)
 #install.packages("reliaR");library(reliaR)
 #install.packages("extRemes");library(extRemes)
 
@@ -58,6 +58,7 @@ plot(fit_gev)
 # Plot profile log likelihood for a better (asymmetric) std approximate
 plot(profile(fit_gev))
 
+#######################################################
 #MCMC
 init <- c(5000,1000,0)
 mat = diag(c(1e11,1e8,1e8))
@@ -79,4 +80,52 @@ acf(MCMC3)
 apply(MCMC3,2,mean)
 apply(MCMC3,2,sd)
 
+###############################################3
+# r largest statistics per month
+# r = 1, meaning one per month, in order to check with gev and mcmc done previously
+months_ <- c(1:months)
+x_m <- matrix(x_m,ncol=1)
+fit0<-rlarg.fit(x_m) # constant
+fit1<-rlarg.fit(x_m,ydat=matrix(months_,ncol=1),mul=c(1)) # linear
+
+# r largest statistics per year
+# r = 1
+time_ <- c(1:years)
+x1 <- apply(matrix(prod,ncol=(ppd*365),byrow=TRUE),1,max)
+x1 <- t(matrix(x1,ncol=(years)))
+x1_check <- apply(matrix(x_m,nrow=37,byrow=TRUE),1,max)#check x1 with previous variable x_m
+
+plot(time_,x1)
+plot(time_,x1_check)
+
+fit0<-rlarg.fit(x1) # constant
+fit1<-rlarg.fit(x1,ydat=matrix(time_,ncol=1),mul=c(1)) # linear
+
+# r = 2
+r_ = 2
+time_ <- rep(1:years,each=r_)
+x_ <- matrix(prod,ncol=(ppd*365),byrow=TRUE)
+x2 <- matrix(nrow = years, ncol = r_)
+for (i in c(1:37)){
+  x2[i,] = rev(tail(sort(x_[i,], decreasing=FALSE),r_)) 
+  print(x2[i,])
+}
+plot(time_,t(x2))
+
+fit0<-rlarg.fit(x2) # constant
+fit1<-rlarg.fit(x2,ydat=matrix(time_,ncol=r_),mul=c(1)) # linear
+
+# r = 12 same number of points than first part
+r_ = 12
+time_ <- rep(1:years,each=r_)
+x_ <- matrix(prod,ncol=(ppd*365),byrow=TRUE)
+x12 <- matrix(nrow = years, ncol = r_)
+for (i in c(1:37)){
+  x12[i,] = rev(tail(sort(x_[i,]),r_)) 
+  print(x12[i,])
+}
+
+plot(time_,t(x12))
+fit0<-rlarg.fit(x12) # constant
+fit1<-rlarg.fit(x12,ydat=matrix(time_,ncol=r_),mul=c(1)) # linear
 
