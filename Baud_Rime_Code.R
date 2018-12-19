@@ -35,6 +35,8 @@ x_m <- as.numeric(prod_m)
 
 # Plot the monthly maximum
 plot(x_m)
+plot(enso)
+plot(x_m, enso)
 
 # QQplot to get an estimate of the parameters
 months <- length(x_m)
@@ -103,21 +105,21 @@ fit1<-rlarg.fit(x1,ydat=matrix(time_,ncol=1),mul=c(1)) # linear
 
 # r = 2
 r_ = 2
-time_ <- rep(1:years,each=r_)
+time2_ <- rep(1:years,each=r_)
 x_ <- matrix(prod,ncol=(ppd*365),byrow=TRUE)
 x2 <- matrix(nrow = years, ncol = r_)
 for (i in c(1:37)){
   x2[i,] = rev(tail(sort(x_[i,], decreasing=FALSE),r_)) 
-  print(x2[i,])
+  #print(x2[i,])
 }
-plot(time_,t(x2))
+plot(time2_,t(x2))
 
 fit0<-rlarg.fit(x2) # constant
 fit1<-rlarg.fit(x2,ydat=matrix(time_,ncol=r_),mul=c(1)) # linear
 
 # r = 12 same number of points than first part
 r_ = 12
-time_ <- rep(1:years,each=r_)
+time12_ <- rep(1:years,each=r_)
 x_ <- matrix(prod,ncol=(ppd*365),byrow=TRUE)
 x12 <- matrix(nrow = years, ncol = r_)
 for (i in c(1:37)){
@@ -125,7 +127,40 @@ for (i in c(1:37)){
   print(x12[i,])
 }
 
-plot(time_,t(x12))
+plot(time12_,t(x12))
 fit0<-rlarg.fit(x12) # constant
 fit1<-rlarg.fit(x12,ydat=matrix(time_,ncol=r_),mul=c(1)) # linear
+
+# r = 12 same number of points than first part
+r_ = 50
+time_ <- rep(1:years,each=r_)
+x_ <- matrix(prod,ncol=(ppd*365),byrow=TRUE)
+x50 <- matrix(nrow = years, ncol = r_)
+for (i in c(1:37)){
+  x50[i,] = rev(tail(sort(x_[i,]),r_)) 
+  #print(x50[i,])
+}
+
+plot(time_,t(x50))
+
+# Look if the data is stationary
+par(mfrow=c(2,2))
+plot(x_m)
+plot(time_,x1)
+plot(time2_,t(x2))
+plot(time12_,t(x12))
+par(mfrow=c(1,1))
+# seems stationary
+
+#compute correlation prod enso
+mat1 <- cbind(x_m,enso)
+plot(mat1)
+cor(mat1)
+# enso in absolute norm
+mat2 <- cbind(x_m,abs(enso))
+plot(mat2)
+cor(mat2)
+
+
+
 
