@@ -256,4 +256,64 @@ rl10pp <- th + scale_/fit3$mle[3]*((m10*zeta)^(fit3$mle[3])-1)
 rl100pp <- th + scale_/fit3$mle[3]*((m100*zeta)^(fit3$mle[3])-1)
 
 ################################################################
+# Bivariate CAPE and SRH
+# Monthly maximum
+# Max of 8 points per day to 1 point per day and add date sequence 
+td <- seq(as.Date("1979/01/01"), as.Date("2015/12/31"), "days")
+td <- td[!grepl(x = td, pattern = "-02-29$")]
+cape_day <- apply(matrix(cape,ncol=ppd,byrow=TRUE),1,max)
+cape_day <- zoo(x = cape_day, order.by = td)
+srh_day <- apply(matrix(srh,ncol=ppd,byrow=TRUE),1,max)
+srh_day <- zoo(x = srh_day, order.by = td)
+# Daily to monthly data taking max per month
+cape_m <- daily2monthly(cape_day, FUN=max, na.rm=TRUE) 
+srh_m <- daily2monthly(srh_day, FUN=max, na.rm=TRUE) 
+
+# Convert zoo to numeric
+cape_day <- as.numeric(cape_day)
+cape_m <- as.numeric(cape_m)
+srh_day <- as.numeric(srh_day)
+srh_m <- as.numeric(srh_m)
+
+# Plot CAPE and SRH
+plot(cape_m)
+plot(srh_m)
+
+# Fit with symmetric model
+fit.mar1 <- fgev(x=cape_m)
+fit.mar2 <- fgev(x=srh_m)
+res1 <- qgev(pgev(cape_m, loc=fit.mar1$param['loc'],
+                  scale=fit.mar1$param['scale'], shape=fit.mar1$param['shape']),1,1,1)
+res2 <- qgev(pgev(srh_m, loc=fit.mar2$param['loc'],
+                  scale=fit.mar2$param['scale'], shape=fit.mar2$param['shape']),1,1,1)
+fbvevd(cbind(res1,res2), cscale=TRUE, cshape=TRUE, cloc=TRUE,
+       loc1=1, scale1=1, shape1=1)
+
+cape_srh_m <- cbind(cape_m,srh_m)
+fit1 <- fbvevd(cape_srh_m,model="log")
+fit1
+par(mfrow=c(3,2))
+plot(fit1)
+
+#Fit with asymmetric model is singular
+
+# Other bivariate models
+fit3 <- fbvevd(cape_srh_m,model="neglog")
+par(mfrow=c(3,2))
+plot(fit3)
+#fit4 <- fbvevd(cape_srh_m,model="bilog") #singular
+#fit5 <- fbvevd(cape_srh_m,model="ct")    #singular
+#fit6 <- fbvevd(cape_srh_m,model="negbilog") #singular
+
+# AIC
+aic1 <- fit1$dev + 2*length(fit1$param)
+aic3 <- fit3$dev + 2*length(fit3$param)
+
+# Asymptotic dependence
+par(mfrow=c(1,2))
+chiplot(cape_srh_m, xlim=c(0.8,1))
+
+
+
+
 
