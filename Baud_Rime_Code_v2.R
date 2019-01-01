@@ -67,7 +67,7 @@ for(month in 2:11){
 #######################################################
 #MCMC
 # choose month between 1 and 12
-month <- 3
+month <- 12
 x_m = as.numeric(prod_monthly[, month])
 init <- c(5000,1000,0)
 mat = diag(c(1e8,1e5,1e5))
@@ -76,6 +76,15 @@ pn = prior.norm(mean=c(0,0,0),cov=mat) # normal distribution, flat prior (uninfo
 if (month == 1){psd = c(400,0.3,0.5)}# sd for proposal dist (normal dist)
 if (month == 2){psd = c(1000,0.4,0.5)}
 if (month == 3){psd = c(1800,0.4,0.5)}
+if (month == 4){psd = c(2900,0.4,0.3)}
+if (month == 5){psd = c(2900,0.4,0.3)}
+if (month == 6){psd = c(2200,0.3,0.3)}
+if (month == 7){psd = c(2000,0.4,0.4)}
+if (month == 8){psd = c(1500,0.4,0.3)}
+if (month == 9){psd = c(1800,0.4,0.3)}
+if (month == 10){psd = c(1200,0.4,0.5)}
+if (month == 11){psd = c(1200,0.4,0.4)}
+if (month == 12){psd = c(400,0.4,0.5)}
  
 # initial value, prior distribution: normal, likelihood: gev, psd: 
 post = posterior(5000,init=init,prior=pn,lh="gev",data=x_m,psd=psd)
@@ -162,7 +171,7 @@ time_ <- rep(1:years,each=r_)
 plot(time_,t(jan))
 plot(time_,t(feb))
 
-# Fit r-largest stat and check time dependence
+# Fit r-largest stat 
 mon <- jan
 fit0<-rlarg.fit(mon) # constant
 fit1<-rlarg.fit(mon,ydat=matrix(time_,ncol=r_),mul=c(1)) # linear
