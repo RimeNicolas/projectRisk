@@ -67,13 +67,16 @@ for(month in 2:11){
 #######################################################
 #MCMC
 # choose month between 1 and 12
-month <- 1
+month <- 3
 x_m = as.numeric(prod_monthly[, month])
 init <- c(5000,1000,0)
 mat = diag(c(1e8,1e5,1e5))
 pn = prior.norm(mean=c(0,0,0),cov=mat) # normal distribution, flat prior (uninformative)
 
-psd = c(400,0.3,0.5) # sd for proposal dist (normal dist)
+if (month == 1){psd = c(400,0.3,0.5)}# sd for proposal dist (normal dist)
+if (month == 2){psd = c(1000,0.4,0.5)}
+if (month == 3){psd = c(1800,0.4,0.5)}
+ 
 # initial value, prior distribution: normal, likelihood: gev, psd: 
 post = posterior(5000,init=init,prior=pn,lh="gev",data=x_m,psd=psd)
 
@@ -98,82 +101,71 @@ hist(u.100,nclass=20,prob=T,xlab="100-year return level")
 
 ###############################################
 # r largest statistics per month
-# r = 1, meaning one per month, in order to check with gev and mcmc done previously
-months_ <- c(1:months)
-x_m <- matrix(x_m,ncol=1)
-fit0<-rlarg.fit(x_m) # constant
-fit1<-rlarg.fit(x_m,ydat=matrix(months_,ncol=1),mul=c(1)) # linear
+r_ <- 2
+jan <- matrix(nrow = years, ncol = r_)
+feb <- matrix(nrow = years, ncol = r_)
+mar <- matrix(nrow = years, ncol = r_)
+apr <- matrix(nrow = years, ncol = r_)
+may <- matrix(nrow = years, ncol = r_)
+jun <- matrix(nrow = years, ncol = r_)
+jul <- matrix(nrow = years, ncol = r_)
+aug <- matrix(nrow = years, ncol = r_)
+sep <- matrix(nrow = years, ncol = r_)
+oct <- matrix(nrow = years, ncol = r_)
+nov <- matrix(nrow = years, ncol = r_)
+dec <- matrix(nrow = years, ncol = r_)
 
-# r largest statistics per year (point 5, otherwise only 37 points, not enough)
-# r = 1
-time_ <- c(1:years)
-x1 <- apply(matrix(prod,ncol=(ppd*365),byrow=TRUE),1,max)
-x1 <- t(matrix(x1,ncol=(years)))
-x1_check <- apply(matrix(x_m,nrow=37,byrow=TRUE),1,max)#check x1 with previous variable x_m
-
-plot(time_,x1)
-plot(time_,x1_check)
-
-fit0<-rlarg.fit(x1) # constant
-fit1<-rlarg.fit(x1,ydat=matrix(time_,ncol=1),mul=c(1)) # linear
-
-# r = 2
-r_ = 2
-time2_ <- rep(1:years,each=r_)
-x_ <- matrix(prod,ncol=(ppd*365),byrow=TRUE)
-x2 <- matrix(nrow = years, ncol = r_)
+index_ <- 0
 for (i in c(1:37)){
-  x2[i,] = rev(tail(sort(x_[i,], decreasing=FALSE),r_)) 
-  #print(x2[i,])
+  jan[i,] <- rev(tail(sort(prod[index_+1:(31*ppd)], decreasing=FALSE),r_))
+  index_ <- index_ + 31*ppd 
+  
+  feb[i,] <- rev(tail(sort(prod[index_+1:(28*ppd)], decreasing=FALSE),r_))
+  index_ <- index_ + 28*ppd
+  
+  mar[i,] <- rev(tail(sort(prod[index_+1:(31*ppd)], decreasing=FALSE),r_))
+  index_ <- index_ + 31*ppd
+  
+  apr[i,] <- rev(tail(sort(prod[index_+1:(30*ppd)], decreasing=FALSE),r_))
+  index_ <- index_ + 30*ppd
+  
+  may[i,] <- rev(tail(sort(prod[index_+1:(31*ppd)], decreasing=FALSE),r_))
+  index_ <- index_ + 31*ppd
+  
+  jun[i,] <- rev(tail(sort(prod[index_+1:(30*ppd)], decreasing=FALSE),r_))
+  index_ <- index_ + 30*ppd
+  
+  jul[i,] <- rev(tail(sort(prod[index_+1:(31*ppd)], decreasing=FALSE),r_))
+  index_ <- index_ + 31*ppd
+  
+  aug[i,] <- rev(tail(sort(prod[index_+1:(31*ppd)], decreasing=FALSE),r_))
+  index_ <- index_ + 31*ppd
+  
+  sep[i,] <- rev(tail(sort(prod[index_+1:(30*ppd)], decreasing=FALSE),r_))
+  index_ <- index_ + 30*ppd
+  
+  oct[i,] <- rev(tail(sort(prod[index_+1:(31*ppd)], decreasing=FALSE),r_))
+  index_ <- index_ + 31*ppd
+  
+  nov[i,] <- rev(tail(sort(prod[index_+1:(30*ppd)], decreasing=FALSE),r_))
+  index_ <- index_ + 30*ppd
+  
+  dec[i,] <- rev(tail(sort(prod[index_+1:(31*ppd)], decreasing=FALSE),r_))
+  index_ <- index_ + 31*ppd
+
 }
-plot(time2_,t(x2))
+print(index_)
 
-fit0<-rlarg.fit(x2) # constant
-fit1<-rlarg.fit(x2,ydat=matrix(time_,ncol=r_),mul=c(1)) # linear
-
-# r = 12 same number of points than first part
-r_ = 12
-time12_ <- rep(1:years,each=r_)
-x_ <- matrix(prod,ncol=(ppd*365),byrow=TRUE)
-x12 <- matrix(nrow = years, ncol = r_)
-for (i in c(1:37)){
-  x12[i,] = rev(tail(sort(x_[i,]),r_)) 
-  print(x12[i,])
-}
-
-plot(time12_,t(x12))
-fit0<-rlarg.fit(x12) # constant
-fit1<-rlarg.fit(x12,ydat=matrix(time_,ncol=r_),mul=c(1)) # linear
-
-# r= 50
-r_ = 50
+# Plot months
+par(mfrow=c(1,2))
 time_ <- rep(1:years,each=r_)
-x_ <- matrix(prod,ncol=(ppd*365),byrow=TRUE)
-x50 <- matrix(nrow = years, ncol = r_)
-for (i in c(1:37)){
-  x50[i,] = rev(tail(sort(x_[i,]),r_)) 
-  #print(x50[i,])
-}
+plot(time_,t(jan))
+plot(time_,t(feb))
 
-plot(time_,t(x50))
-
-# Look if the data is stationary
-par(mfrow=c(2,2))
-plot(x_m)
-plot(time_,x1)
-plot(time2_,t(x2))
-plot(time12_,t(x12))
-par(mfrow=c(1,1))
-# seems stationary
-
-#compute correlation prod enso
-mat1 <- cbind(x_m,enso)
-plot(mat1)
-cor(mat1)
-# enso in absolute norm
-mat2 <- cbind(x_m,abs(enso))
-plot(mat2)
-cor(mat2)
+# Fit r-largest stat
+fit0<-rlarg.fit(jan) # constant
+fit1<-rlarg.fit(jan,ydat=matrix(time_,ncol=r_),mul=c(1)) # linear
+plot(fit0)
 
 ########################################################################
 # Peaks over threshold
