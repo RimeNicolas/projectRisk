@@ -29,56 +29,62 @@ prod_m <- daily2monthly(prod_day, FUN=max, na.rm=TRUE) #prod max per month
 # Plot daily maximum
 plot(td, prod_day)
 
+#Separate by month
+prod_monthly <- matrix(prod_m, ncol=12, byrow=TRUE)
+
 # Convert zoo to numeric
 x_day <- as.numeric(prod_day)
-x_m <- as.numeric(prod_m)
-
+x_monthly <- as.numeric(prod_monthly)
 # Plot the monthly maximum
-plot(x_m)
+x_monthly_max <- t(prod_monthly)
+matplot(x_monthly_max, lty = 1:12, pch = "o", lend = par("cex"), type="p", col="black")
+plot(x_monthly)
+# Plot enso and enso monthly
 plot(enso)
-plot(x_m, enso)
+enso_monthly_max <- t(matrix(enso, ncol=12, byrow=TRUE))
+matplot(enso_monthly_max, lty = 1:12, pch = "o", lend = par("cex"), type="p", col="black")
+# Plot Prod monthly accroding to enso_monthly
+enso_monthly <- matrix(enso, ncol=12, byrow=TRUE)
+matplot( enso_monthly, prod_monthly, pch = "o", lend = par("cex"), type="p", col="black")
 
-# QQplot to get an estimate of the parameters
-months <- length(x_m)
-qqplot(qgumbel(c(1:months)/(months+1)),x_m)
-qqline(x_m,distribution=qgumbel)
-
-# Fit GEV 
-fit_gev = fgev(x_m)
-estimators = fitted(fit_gev) #estimation of the parameters
-std = std.errors(fit_gev) #std of the parameters (normal dist.)
-par(mfrow=c(2,2))
-#par(mfrow=c(1,1))
-
-# Plot pp plot, qq plot, density plot and return level
-#pp plot: x: F_GEV(data_i) y: i/(n+1) better for the bulk of the distribution
-#qq plot: x: F_GEV^(-1)(i/(n+1)) y: data_i  better for the tail of the distribution
-#density plot: x: data_i y: f_GEV^(-1)(i/(n+1))
-#return level: x: T y: y_T such that 1 - GEV(y_T) = 1/T 
-plot(fit_gev) 
-
-# Plot profile log likelihood for a better (asymmetric) std approximate
-plot(profile(fit_gev))
+for(month in 2:11){
+  print(c("SIM NB = ",month))
+  x_month = as.numeric(prod_monthly[, month])
+  par(mfrow=c(1,1))
+  plot(x_month)
+  fit_gev = fgev(x_month)
+  parameters = fitted(fit_gev) #estimation of the parameters
+  print(c("parameters = ",parameters))
+  std = std.errors(fit_gev) #std of the parameters (normal dist.)
+  print(c("std = ",std))
+  par(mfrow=c(2,2))
+  plot(fit_gev)
+  # Plot profile log likelihood for a better (asymmetric) std approximate
+  aaa <- profile(fit_gev)
+  plot(aaa)
+}
 
 #######################################################
 #MCMC
+# choose month between 1 and 12
+month <- 1
+x_m = as.numeric(prod_monthly[, month])
 init <- c(5000,1000,0)
-mat = diag(c(1e11,1e8,1e8))
-pn = prior.norm(mean=c(0,0,0),cov=mat) # normal distribution
+mat = diag(c(1e8,1e5,1e5))
+pn = prior.norm(mean=c(0,0,0),cov=mat) # normal distribution, flat prior (uninformative)
 
-psd = c(800,0.10,0.12) # sd for proposal dist (normal dist)
+psd = c(400,0.3,0.5) # sd for proposal dist (normal dist)
 # initial value, prior distribution: normal, likelihood: gev, psd: 
 post = posterior(5000,init=init,prior=pn,lh="gev",data=x_m,psd=psd)
 
-#mc = mcmc(post[-c(1:300),])
 mc = mcmc(post)
 plot(mc)
 attr(mc,"ar")
 
-MCMC2<-mcmc(post[-c(1:300),])
+MCMC2<-mcmc(post[-c(1:500),])
 acf(MCMC2)
 
-MCMC3<-mcmc(post[500 + 7.5*c(1:337),])
+MCMC3<-mcmc(post[500 + 9*c(1:500),])
 acf(MCMC3)
 apply(MCMC3,2,mean)
 apply(MCMC3,2,sd)
@@ -90,7 +96,7 @@ u.100<-mc.quant(MCMC3,p=0.99,lh="gev")
 hist(u.10,nclass=20,prob=T,xlab="10-year return level")
 hist(u.100,nclass=20,prob=T,xlab="100-year return level")
 
-###############################################3
+###############################################
 # r largest statistics per month
 # r = 1, meaning one per month, in order to check with gev and mcmc done previously
 months_ <- c(1:months)
