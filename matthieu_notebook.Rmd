@@ -1,0 +1,186 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+
+```{r}
+# Load data and transform it 
+cape = get(load("./data/CAPE_Baud_Rime.RData"))
+srh = get(load("./data/SRH_Baud_Rime.RData"))
+enso = get(load("./data/NINO34.RData"))
+prod = sqrt(cape)*srh
+
+```
+
+
+```{r}
+# Define variables
+ppd <- 8 #point per day
+years <- 37
+months <- 12
+data_size <- ppd*365*years #length(cape)
+```
+
+```{r}
+# Max of 8 points per day to 1 point per day and add date sequence 
+td <- seq(as.Date("1979/01/01"), as.Date("2015/12/31"), "days")
+td <- td[!grepl(x = td, pattern = "-02-29$")]
+prod_day <- apply(matrix(prod,ncol=ppd,byrow=TRUE),1,max)
+prod_day <- zoo(x = prod_day, order.by = td)
+
+# Plot daily maximum
+plot(prod_day)
+plot(td, prod_day)
+
+#Save as image
+png(filename="C:/Users/Matthieu/Desktop/master1/Risk, Rare Event and Extremes/projectRisk-master/rapport/images/prod_day.png")
+plot(prod_day)
+dev.off()
+
+# Daily to monthly data taking max per month
+prod_m <- daily2monthly(prod_day, FUN=max, na.rm=TRUE) #prod max per month
+plot(prod_m)
+
+#Separate by month
+prod_monthly <- matrix(prod_m, ncol=12, byrow=TRUE)
+plot(prod_monthly)
+
+
+```
+
+
+```{r}
+
+# Convert zoo to numeric
+x_day <- as.numeric(prod_day)
+x_monthly <- as.numeric(prod_monthly)
+
+
+# Plot the monthly maximum
+x_monthly_max <- t(prod_monthly)
+matplot(x_monthly_max, lty = 1:12, pch = "o", lend = par("cex"), type="p", col="black")
+plot(x_monthly)
+
+#PLot enso and enso monthly
+plot(enso)
+enso_monthly_max <- t(matrix(enso, ncol=12, byrow=TRUE))
+matplot(enso_monthly_max, lty = 1:12, pch = "o", lend = par("cex"), type="p", col="black")
+
+#Plot Prod monthly accroding to enso_monthly
+enso_monthly <- matrix(enso, ncol=12, byrow=TRUE)
+matplot( enso_monthly, prod_monthly, pch = "o", lend = par("cex"), type="p", col="black")
+
+
+#Save plots
+png(filename="C:/Users/Matthieu/Desktop/master1/Risk, Rare Event and Extremes/projectRisk-master/rapport/images/x_monthly_max.png")
+matplot(x_monthly_max, lty = 1:12, pch = "o", lend = par("cex"), type="p", col="black")
+dev.off()
+
+png(filename="C:/Users/Matthieu/Desktop/master1/Risk, Rare Event and Extremes/projectRisk-master/rapport/images/x_monthly.png")
+plot(x_monthly)
+dev.off()
+
+png(filename="C:/Users/Matthieu/Desktop/master1/Risk, Rare Event and Extremes/projectRisk-master/rapport/images/enso_monthly.png")
+matplot(enso_monthly_max, lty = 1:12, pch = "o", lend = par("cex"), type="p", col="black")
+dev.off()
+
+png(filename="C:/Users/Matthieu/Desktop/master1/Risk, Rare Event and Extremes/projectRisk-master/rapport/images/enso.png")
+plot(enso)
+dev.off()
+
+png(filename="C:/Users/Matthieu/Desktop/master1/Risk, Rare Event and Extremes/projectRisk-master/rapport/images/x_monthly_enso_monthly.png")
+matplot( enso_monthly, prod_monthly, pch = "o", lend = par("cex"), type="p", col="black")
+dev.off()
+
+
+
+```
+
+```{r}
+# QQplot to get an estimate of the parameters
+
+months <- length(x_monthly)
+months
+
+#QQ plots with the 3 mains GEV cases, separation by months does not change anything
+qqplot(qgumbel(c(1:months)/(months+1)),x_monthly)
+qqline(x_monthly,distribution=qgumbel)
+
+qqplot(qfrechet(c(1:months)/(months+1)),x_monthly)
+qqline(x_m,distribution=qfrechet)
+
+qqplot(qrweibull(c(1:months)/(months+1)),x_monthly)
+qqline(x_m,distribution=qrweibull)
+
+#Save QQ plots with default param specify in the rapport
+png(filename="C:/Users/Matthieu/Desktop/master1/Risk, Rare Event and Extremes/projectRisk-master/rapport/images/qq_plot_gumbel.png")
+qqplot(qgumbel(c(1:months)/(months+1)),x_monthly)
+qqline(x_monthly,distribution=qgumbel)
+dev.off()
+
+png(filename="C:/Users/Matthieu/Desktop/master1/Risk, Rare Event and Extremes/projectRisk-master/rapport/images/qq_plot_frechet.png")
+qqplot(qfrechet(c(1:months)/(months+1)),x_monthly)
+qqline(x_monthly,distribution=qfrechet)
+dev.off()
+
+png(filename="C:/Users/Matthieu/Desktop/master1/Risk, Rare Event and Extremes/projectRisk-master/rapport/images/qq_plot_inv_weibull.png")
+qqplot(qrweibull(c(1:months)/(months+1)),x_monthly)
+qqline(x_monthly,distribution=qnweibull)
+dev.off()
+
+```
+
+```{r}
+
+for(month in 2:12){
+  x_month = as.numeric(prod_monthly[, month])
+  fit_gev = fgev(x_month)
+  estimators = fitted(fit_gev) #estimation of the parameters
+  estimators
+  std = std.errors(fit_gev) #std of the parameters (normal dist.)
+  std
+  par(mfrow=c(2,2))
+  plot(fit_gev)
+
+
+  # Plot profile log likelihood for a better (asymmetric) std approximate
+  plot(profile(fit_gev))
+}
+
+```
+
+```{r}
+# Fit GEV and maximum likelihood
+fit_gev = fgev(x_monthly)
+estimators = fitted(fit_gev) #estimation of the parameters
+estimators
+std = std.errors(fit_gev) #std of the parameters (normal dist.)
+std
+par(mfrow=c(2,2))
+#par(mfrow=c(1,1))
+
+# Plot pp plot, qq plot, density plot and return level
+#pp plot: x: F_GEV(data_i) y: i/(n+1) better for the bulk of the distribution
+#qq plot: x: F_GEV^(-1)(i/(n+1)) y: data_i  better for the tail of the distribution
+#density plot: x: data_i y: f_GEV^(-1)(i/(n+1))
+#return level: x: T y: y_T such that 1 - GEV(y_T) = 1/T 
+plot(fit_gev)
+
+
+# Plot profile log likelihood for a better (asymmetric) std approximate
+plot(profile(fit_gev))
+
+#Save GEV MLE plots
+png(filename="C:/Users/Matthieu/Desktop/master1/Risk, Rare Event and Extremes/projectRisk-master/rapport/images/fit_gev.png")
+par(mfrow=c(2,2))
+plot(fit_gev)
+dev.off()
+
+png(filename="C:/Users/Matthieu/Desktop/master1/Risk, Rare Event and Extremes/projectRisk-master/rapport/images/fit_gev_profile.png")
+par(mfrow=c(2,2))
+plot(profile(fit_gev))
+dev.off()
+
+
+```
