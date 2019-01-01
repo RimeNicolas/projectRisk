@@ -162,10 +162,17 @@ time_ <- rep(1:years,each=r_)
 plot(time_,t(jan))
 plot(time_,t(feb))
 
-# Fit r-largest stat
-fit0<-rlarg.fit(jan) # constant
-fit1<-rlarg.fit(jan,ydat=matrix(time_,ncol=r_),mul=c(1)) # linear
-plot(fit0)
+# Fit r-largest stat and check time dependence
+mon <- jan
+fit0<-rlarg.fit(mon) # constant
+fit1<-rlarg.fit(mon,ydat=matrix(time_,ncol=r_),mul=c(1)) # linear
+
+fit0$mle
+fit1$mle
+########################################################################
+# Check correlation with enso
+
+
 
 ########################################################################
 # Peaks over threshold
