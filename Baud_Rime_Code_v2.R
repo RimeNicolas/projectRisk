@@ -64,26 +64,39 @@ for(month in 2:11){
   plot(aaa)
 }
 
+## For March only, graphs used in the report
+years_vec <- c(1979:2015)
+x_month = as.numeric(prod_monthly[, 3])
+
+fit_gev = fgev(x_month)
+parameters = fitted(fit_gev) #estimation of the parameters
+print(c("parameters = ",parameters))
+std = std.errors(fit_gev) #std of the parameters (normal dist.)
+print(c("std = ",std))
+
+par(mfrow=c(2,2))
+plot(fit_gev)
+
+# Plot profile log likelihood for a better (asymmetric) std approximate
+plot(profile(fit_gev))
+plot(years_vec,x_month, xlab='Years', ylab='Max March')
+title(main = 'Raw data')
+##
+
 ########################################################################
 # Check ratio stat with ENSO
 for(month in 2:11){
   print(c("SIM NB = ",month))
   x_month = as.numeric(prod_monthly[, month])
-  #par(mfrow=c(1,1))
-  #plot(x_month)
   fit_gev = fgev(x_month)
   fit_gev_enso <-fgev(x_month,nsloc=enso[seq(from = month, to = 444, by = 12)])
-  ratio <- fit_gev_enso$dev-fit_gev$dev
+  ratio <- fit_gev$dev-fit_gev_enso$dev
   p <- 1-pchisq(ratio,1)
+  #print(c("ratio = ",ratio))
   print(c("p-value = ",p))
-  parameters = fitted(fit_gev) #estimation of the parameters
-  print(c("parameters = ",parameters))
-  std = std.errors(fit_gev) #std of the parameters (normal dist.)
-  print(c("std = ",std))
-  par(mfrow=c(2,2))
-  plot(fit_gev)
-  # Plot profile log likelihood for a better (asymmetric) std approximate
-  #plot(profile(fit_gev))
+  par(mfrow=c(1,2))
+  plot(years_vec,x_month)
+  plot(years_vec,enso[seq(from = month, to = 444, by = 12)])
 }
 
 # Check ratio stat with TIME
@@ -91,21 +104,15 @@ for(month in 2:11){
 for(month in 2:11){
   print(c("SIM NB = ",month))
   x_month = as.numeric(prod_monthly[, month])
-  #par(mfrow=c(1,1))
-  #plot(x_month)
   fit_gev = fgev(x_month)
   fit_gev_time <-fgev(x_month,nsloc=c(1:37))
-  ratio <- fit_gev_time$dev-fit_gev$dev
+  ratio <- fit_gev$dev-fit_gev_time$dev
   p <- 1-pchisq(ratio,1)
+  #print(c("ratio = ",ratio))
   print(c("p-value = ",p))
-  parameters = fitted(fit_gev) #estimation of the parameters
-  print(c("parameters = ",parameters))
-  std = std.errors(fit_gev) #std of the parameters (normal dist.)
-  print(c("std = ",std))
-  par(mfrow=c(2,2))
-  plot(fit_gev)
-  # Plot profile log likelihood for a better (asymmetric) std approximate
-  #plot(profile(fit_gev))
+  par(mfrow=c(1,2))
+  plot(years_vec,x_month)
+  plot(years_vec,enso[seq(from = month, to = 444, by = 12)])
 }
 
 # Check correlation with ENSO
@@ -115,11 +122,11 @@ for(month in 1:12){
   mat1 <- cbind(x_month,enso[seq(from = month, to = 444, by = 12)])
   plot(mat1)
   corr <- cor(mat1)
-  print(c("Correlation = ",corr))
-  mat2 <- cbind(x_month,abs(enso[seq(from = month, to = 444, by = 12)]))
-  plot(mat2)
-  corr_abs <- cor(mat2)
-  print(c("Correlation ABSOLU= ",corr_abs))
+  print(c("Correlation = ",corr[2]))
+  #mat2 <- cbind(x_month,abs(enso[seq(from = month, to = 444, by = 12)]))
+  #plot(mat2)
+  #corr_abs <- cor(mat2)
+  #print(c("Correlation ABSOLU= ",corr_abs))
 }
 
 #######################################################
@@ -450,7 +457,24 @@ aic3 <- fit3$dev + 2*length(fit3$param)
 par(mfrow=c(1,2))
 chiplot(cape_srh_m, xlim=c(0.8,1))
 
-
+########################################################################################
+# log PROD
+for(month in 2:12){
+  print(c("SIM NB = ",month))
+  x_month = as.numeric(log(prod_monthly[, month]))
+  par(mfrow=c(1,1))
+  plot(x_month)
+  fit_gev = fgev(x_month)
+  parameters = fitted(fit_gev) #estimation of the parameters
+  print(c("parameters = ",parameters))
+  std = std.errors(fit_gev) #std of the parameters (normal dist.)
+  print(c("std = ",std))
+  par(mfrow=c(2,2))
+  plot(fit_gev)
+  # Plot profile log likelihood for a better (asymmetric) std approximate
+  aaa <- profile(fit_gev)
+  plot(aaa)
+}
 
 
 
