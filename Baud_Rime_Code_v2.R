@@ -166,6 +166,9 @@ u.100<-mc.quant(MCMC3,p=0.99,lh="gev")
 hist(u.10,nclass=20,prob=T,xlab="10-year return level")
 hist(u.100,nclass=20,prob=T,xlab="100-year return level")
 
+print(c("rl10 MCMC = ",u.10))
+print(c("rl100 MCMC = ",u.100))
+
 ###############################################
 # r largest statistics per month
 r_ <- 1
@@ -294,8 +297,11 @@ for (i in c(1:37)){
 }
 print(index_)
 
+# Choose month
+mon <- mar; month <- 3
 
-plot(prod)
+par(mfrow=c(1,1))
+plot(mon)
 qu.min <- quantile(prod, 0.5) # median value
 qu.max <- quantile(prod,(length(prod)-30)/length(prod))
 print(paste0("median: ",qu.min,", quantile max: ",qu.max))
@@ -306,16 +312,22 @@ tcplot(prod,tlim=c(qu.min, qu.max))
 #gpd.fitrange(prod,umin=qu.min, umax=qu.max)
 
 # Choose threshold by hand giving a good variance bias trade-off
-th <- 1.8e4
-points_year <- 8*365
-fit<-fpot(prod,threshold=th,npp=points_year)
+if (month == 1){th <- 1.2e4; points_month <- 8*31}
+if (month == 2){th <- 1.2e4; points_month <- 8*28}
+if (month == 3){th <- 1.2e4; points_month <- 8*31}
+if (month == 4){psd = c(2900,0.4,0.3)}
+if (month == 5){psd = c(2900,0.4,0.3)}
+if (month == 6){psd = c(2200,0.3,0.3)}
+if (month == 7){psd = c(2000,0.4,0.4)}
+if (month == 8){psd = c(1500,0.4,0.3)}
+if (month == 9){psd = c(1800,0.4,0.3)}
+if (month == 10){psd = c(1200,0.4,0.5)}
+if (month == 11){psd = c(1200,0.4,0.4)}
+if (month == 12){psd = c(400,0.4,0.5)}
+
+fit<-fpot(prod,threshold=th,npp=points_month)
 par(mfrow=c(2,2))
 plot(fit)
-# 1.8e4 seems to be the a good threshold, 1.9e4 is less precise
-th2 <- 1.9e4
-fit2<-fpot(prod,threshold=th2,npp=points_year)
-par(mfrow=c(2,2))
-plot(fit2)
 
 estimatorsPOT = fitted(fit) #estimation of the parameters
 stdPOT = std.errors(fit) #std of the parameters (normal dist.)
@@ -325,31 +337,28 @@ par(mfrow=c(1,2))
 plot(profile(fit))
 abline(v=0,col=2,lty=2)
 # Zero shape should be considered
-fit.gum<-fpot(prod, threshold=th, npp=points_year, shape=0)
+fit.gum<-fpot(prod, threshold=th, npp=points_month, shape=0)
 # Diagnositc plot, shape zero give good results
 par(mfrow=c(2,2))
 plot(fit.gum)
 estimatorsPOT_0 = fitted(fit.gum)
 stdPOT_0 = std.errors(fit.gum)
 
+print(c("Threshold = ",th))
+print(c("estimators POT = ",estimatorsPOT))
+print(c("std POT = ",stdPOT))
+print(c("estimators POT shape:0 = ",estimatorsPOT_0))
+print(c("std POT shape: 0 = ",stdPOT_0))
+
 ######################################################################
 #return level POT shape NON zero
-m10 <- 10*points_year
-m100 <- 100*points_year
+m10 <- 10*points_month
+m100 <- 100*points_month
 rl10pot <- th + fit$est[1]/fit$est[2]*((m10*fit$pat)^(fit$est[2])-1)
 rl100pot <- th + fit$est[1]/fit$est[2]*((m100*fit$pat)^(fit$est[2])-1)
 
-fit2<-gpd.fit(prod,threshold=th, npy=points_year)
+fit2<-gpd.fit(prod,threshold=th, npy=points_month)
 gpd.diag(fit2)
-
-par(mfrow=c(1,2))
-#Set good lower and upper bound - manually
-gpd.prof(z=fit2, m=10, xlow=2.8e4, xup=3.5e4, npy = points_year, conf = 0.95)
-title("Profile Log-likelihood \n of 10-year Return Level")
-abline(v=rl10pot)
-gpd.prof(z=fit2, m=100, xlow=3.25e4, xup=4.8e4, npy = points_year, conf = 0.95)
-title("Profile Log Likelihood \n of 100-year Return Level")
-abline(v=rl100pot) #must coincide with MLE
 
 #return level POT shape = 0
 rl10_0 <- th + fit.gum$est[1]*log((m10*fit.gum$pat))
@@ -357,13 +366,9 @@ rl100_0 <- th + fit.gum$est[1]*log((m100*fit.gum$pat))
 
 ###################################################################
 # Poisson process
-# NOT working with initial threshold th with initial threshold
-# information matrix singular
 
-# try higher threshold 0.98 quantile
-# keep this threshold, quantile 0.99 not working
-th3 <-quantile(prod,0.98)
-fit3<-pp.fit(prod,threshold=th3, npy=points_year)
+th3 <-quantile(prod,0.99)
+fit3<-pp.fit(prod,threshold=th3, npy=points_month)
 par(mfrow=c(2,2))
 pp.diag(fit3)
 
@@ -378,6 +383,16 @@ zeta <- n/data_size
 scale_ <- fit3$mle[2] + (th3 - fit3$mle[1])*fit3$mle[3]
 rl10pp <- th + scale_/fit3$mle[3]*((m10*zeta)^(fit3$mle[3])-1)
 rl100pp <- th + scale_/fit3$mle[3]*((m100*zeta)^(fit3$mle[3])-1)
+
+print(c("Threshold POT = ",th))
+print(c("Threshold PP = ",th3))
+print(c("rl10 POT = ",rl10pot))
+print(c("rl100 POT = ",rl100pot))
+print(c("rl10 POT shape:0 = ",rl10_0))
+print(c("rl100 POT shape:0 = ",rl100_0))
+print(c("rl10 PP = ",rl10pp))
+print(c("rl100 PP = ",rl100pp))
+
 
 ################################################################
 # Bivariate CAPE and SRH
@@ -418,8 +433,6 @@ fit1 <- fbvevd(cape_srh_m,model="log")
 fit1
 par(mfrow=c(3,2))
 plot(fit1)
-
-#Fit with asymmetric model is singular
 
 # Other bivariate models
 fit3 <- fbvevd(cape_srh_m,model="neglog")
