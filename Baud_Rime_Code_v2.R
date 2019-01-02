@@ -64,6 +64,64 @@ for(month in 2:11){
   plot(aaa)
 }
 
+########################################################################
+# Check ratio stat with ENSO
+for(month in 2:11){
+  print(c("SIM NB = ",month))
+  x_month = as.numeric(prod_monthly[, month])
+  #par(mfrow=c(1,1))
+  #plot(x_month)
+  fit_gev = fgev(x_month)
+  fit_gev_enso <-fgev(x_month,nsloc=enso[seq(from = month, to = 444, by = 12)])
+  ratio <- fit_gev_enso$dev-fit_gev$dev
+  p <- 1-pchisq(ratio,1)
+  print(c("p-value = ",p))
+  parameters = fitted(fit_gev) #estimation of the parameters
+  print(c("parameters = ",parameters))
+  std = std.errors(fit_gev) #std of the parameters (normal dist.)
+  print(c("std = ",std))
+  par(mfrow=c(2,2))
+  plot(fit_gev)
+  # Plot profile log likelihood for a better (asymmetric) std approximate
+  #plot(profile(fit_gev))
+}
+
+# Check ratio stat with TIME
+
+for(month in 2:11){
+  print(c("SIM NB = ",month))
+  x_month = as.numeric(prod_monthly[, month])
+  #par(mfrow=c(1,1))
+  #plot(x_month)
+  fit_gev = fgev(x_month)
+  fit_gev_time <-fgev(x_month,nsloc=c(1:37))
+  ratio <- fit_gev_time$dev-fit_gev$dev
+  p <- 1-pchisq(ratio,1)
+  print(c("p-value = ",p))
+  parameters = fitted(fit_gev) #estimation of the parameters
+  print(c("parameters = ",parameters))
+  std = std.errors(fit_gev) #std of the parameters (normal dist.)
+  print(c("std = ",std))
+  par(mfrow=c(2,2))
+  plot(fit_gev)
+  # Plot profile log likelihood for a better (asymmetric) std approximate
+  #plot(profile(fit_gev))
+}
+
+# Check correlation with ENSO
+for(month in 1:12){
+  print(c("SIM NB = ",month))
+  x_month <- as.numeric(prod_monthly[, month])
+  mat1 <- cbind(x_month,enso[seq(from = month, to = 444, by = 12)])
+  plot(mat1)
+  corr <- cor(mat1)
+  print(c("Correlation = ",corr))
+  mat2 <- cbind(x_month,abs(enso[seq(from = month, to = 444, by = 12)]))
+  plot(mat2)
+  corr_abs <- cor(mat2)
+  print(c("Correlation ABSOLU= ",corr_abs))
+}
+
 #######################################################
 #MCMC
 # choose month between 1 and 12
@@ -110,7 +168,7 @@ hist(u.100,nclass=20,prob=T,xlab="100-year return level")
 
 ###############################################
 # r largest statistics per month
-r_ <- 2
+r_ <- 1
 jan <- matrix(nrow = years, ncol = r_)
 feb <- matrix(nrow = years, ncol = r_)
 mar <- matrix(nrow = years, ncol = r_)
@@ -124,67 +182,119 @@ oct <- matrix(nrow = years, ncol = r_)
 nov <- matrix(nrow = years, ncol = r_)
 dec <- matrix(nrow = years, ncol = r_)
 
-index_ <- 0
+index_ <- 1
 for (i in c(1:37)){
-  jan[i,] <- rev(tail(sort(prod[index_+1:(31*ppd)], decreasing=FALSE),r_))
+  jan[i,] <- rev(tail(sort(prod[index_:(index_+31*ppd)], decreasing=FALSE),r_))
   index_ <- index_ + 31*ppd 
   
-  feb[i,] <- rev(tail(sort(prod[index_+1:(28*ppd)], decreasing=FALSE),r_))
+  feb[i,] <- rev(tail(sort(prod[index_:(index_+28*ppd)], decreasing=FALSE),r_))
   index_ <- index_ + 28*ppd
   
-  mar[i,] <- rev(tail(sort(prod[index_+1:(31*ppd)], decreasing=FALSE),r_))
+  mar[i,] <- rev(tail(sort(prod[index_:(index_+31*ppd)], decreasing=FALSE),r_))
   index_ <- index_ + 31*ppd
   
-  apr[i,] <- rev(tail(sort(prod[index_+1:(30*ppd)], decreasing=FALSE),r_))
+  apr[i,] <- rev(tail(sort(prod[index_:(index_+30*ppd)], decreasing=FALSE),r_))
   index_ <- index_ + 30*ppd
   
-  may[i,] <- rev(tail(sort(prod[index_+1:(31*ppd)], decreasing=FALSE),r_))
+  may[i,] <- rev(tail(sort(prod[index_:(index_+31*ppd)], decreasing=FALSE),r_))
   index_ <- index_ + 31*ppd
   
-  jun[i,] <- rev(tail(sort(prod[index_+1:(30*ppd)], decreasing=FALSE),r_))
+  jun[i,] <- rev(tail(sort(prod[index_:(index_+30*ppd)], decreasing=FALSE),r_))
   index_ <- index_ + 30*ppd
   
-  jul[i,] <- rev(tail(sort(prod[index_+1:(31*ppd)], decreasing=FALSE),r_))
+  jul[i,] <- rev(tail(sort(prod[index_:(index_+31*ppd)], decreasing=FALSE),r_))
   index_ <- index_ + 31*ppd
   
-  aug[i,] <- rev(tail(sort(prod[index_+1:(31*ppd)], decreasing=FALSE),r_))
+  aug[i,] <- rev(tail(sort(prod[index_:(index_+30*ppd)], decreasing=FALSE),r_))
   index_ <- index_ + 31*ppd
   
-  sep[i,] <- rev(tail(sort(prod[index_+1:(30*ppd)], decreasing=FALSE),r_))
+  sep[i,] <- rev(tail(sort(prod[index_:(index_+31*ppd)], decreasing=FALSE),r_))
   index_ <- index_ + 30*ppd
   
-  oct[i,] <- rev(tail(sort(prod[index_+1:(31*ppd)], decreasing=FALSE),r_))
+  oct[i,] <- rev(tail(sort(prod[index_:(index_+31*ppd)], decreasing=FALSE),r_))
   index_ <- index_ + 31*ppd
   
-  nov[i,] <- rev(tail(sort(prod[index_+1:(30*ppd)], decreasing=FALSE),r_))
+  nov[i,] <- rev(tail(sort(prod[index_:(index_+30*ppd)], decreasing=FALSE),r_))
   index_ <- index_ + 30*ppd
   
-  dec[i,] <- rev(tail(sort(prod[index_+1:(31*ppd)], decreasing=FALSE),r_))
+  dec[i,] <- rev(tail(sort(prod[index_:(index_+31*ppd)], decreasing=FALSE),r_))
   index_ <- index_ + 31*ppd
 
 }
 print(index_)
 
 # Plot months
-par(mfrow=c(1,2))
+par(mfrow=c(1,1))
 time_ <- rep(1:years,each=r_)
 plot(time_,t(jan))
-plot(time_,t(feb))
+#plot(time_,t(feb))
 
 # Fit r-largest stat 
-mon <- jan
+mon <- feb
 fit0<-rlarg.fit(mon) # constant
 fit1<-rlarg.fit(mon,ydat=matrix(time_,ncol=r_),mul=c(1)) # linear
 
 fit0$mle
 fit1$mle
-########################################################################
-# Check correlation with enso
-
 
 
 ########################################################################
 # Peaks over threshold
+jan <- c(1:(ppd*31*37))
+feb <- c(1:(ppd*28*37))
+mar <- c(1:(ppd*31*37))
+apr <- c(1:(ppd*30*37))
+may <- c(1:(ppd*31*37))
+jun <- c(1:(ppd*30*37))
+jul <- c(1:(ppd*31*37))
+aug <- c(1:(ppd*31*37))
+sep <- c(1:(ppd*30*37))
+oct <- c(1:(ppd*31*37))
+nov <- c(1:(ppd*30*37))
+dec <- c(1:(ppd*31*37))
+
+index_ <- 1
+for (i in c(1:37)){
+  jan[(1+(31*ppd*(i-1))):(31*ppd*i)] <- prod[index_:(index_+31*ppd-1)]
+  index_ <- index_ + 31*ppd 
+  
+  feb[(1+(28*ppd*(i-1))):(28*ppd*i)] <- prod[index_:(index_+28*ppd-1)]
+  index_ <- index_ + 28*ppd 
+  
+  mar[(1+(31*ppd*(i-1))):(31*ppd*i)] <- prod[index_:(index_+31*ppd-1)]
+  index_ <- index_ + 31*ppd 
+  
+  apr[(1+(30*ppd*(i-1))):(30*ppd*i)] <- prod[index_:(index_+30*ppd-1)]
+  index_ <- index_ + 30*ppd 
+  
+  may[(1+(31*ppd*(i-1))):(31*ppd*i)] <- prod[index_:(index_+31*ppd-1)]
+  index_ <- index_ + 31*ppd 
+  
+  jun[(1+(30*ppd*(i-1))):(30*ppd*i)] <- prod[index_:(index_+30*ppd-1)]
+  index_ <- index_ + 30*ppd 
+  
+  jul[(1+(31*ppd*(i-1))):(31*ppd*i)] <- prod[index_:(index_+31*ppd-1)]
+  index_ <- index_ + 31*ppd 
+  
+  aug[(1+(31*ppd*(i-1))):(31*ppd*i)] <- prod[index_:(index_+31*ppd-1)]
+  index_ <- index_ + 31*ppd 
+  
+  sep[(1+(30*ppd*(i-1))):(30*ppd*i)] <- prod[index_:(index_+30*ppd-1)]
+  index_ <- index_ + 30*ppd 
+  
+  oct[(1+(31*ppd*(i-1))):(31*ppd*i)] <- prod[index_:(index_+31*ppd-1)]
+  index_ <- index_ + 31*ppd 
+  
+  nov[(1+(30*ppd*(i-1))):(30*ppd*i)] <- prod[index_:(index_+30*ppd-1)]
+  index_ <- index_ + 30*ppd 
+  
+  dec[(1+(31*ppd*(i-1))):(31*ppd*i)] <- prod[index_:(index_+31*ppd-1)]
+  index_ <- index_ + 31*ppd 
+  
+}
+print(index_)
+
+
 plot(prod)
 qu.min <- quantile(prod, 0.5) # median value
 qu.max <- quantile(prod,(length(prod)-30)/length(prod))
