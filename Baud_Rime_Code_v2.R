@@ -1,7 +1,9 @@
-install.packages("evd");install.packages("evdbayes");install.packages("coda");install.packages("ismev")
+install.packages("evd");install.packages("evdbayes");install.packages("coda");
+install.packages("ismev")
 library(evd);library(evdbayes);library(coda);library(ismev)
 #install.packages("reliaR");library(reliaR)
-#install.packages("extRemes");library(extRemes)
+#install.packages("extRemes");
+library(extRemes)
 
 # Install packages to simplify life
 install.packages("hydroTSM");
@@ -305,22 +307,20 @@ for (i in c(1:37)){
 print(index_)
 
 # Choose month
-mon <- mar; month <- 3
+mon <- feb; month <- 2
 
 par(mfrow=c(1,1))
 plot(mon)
-qu.min <- quantile(prod, 0.5) # median value
-qu.max <- quantile(prod,(length(prod)-30)/length(prod))
+qu.min <- quantile(mon, 0.5) # median value
+qu.max <- quantile(mon,(length(mon)-30)/length(mon))
 print(paste0("median: ",qu.min,", quantile max: ",qu.max))
-mrlplot(prod, tlim=c(qu.min, qu.max))
+mrlplot(mon, tlim=c(qu.min, qu.max))
 par(mfrow=c(1,2))
-tcplot(prod,tlim=c(qu.min, qu.max))
-#or use ismev equivalent
-#gpd.fitrange(prod,umin=qu.min, umax=qu.max)
+tcplot(mon,tlim=c(qu.min, qu.max))
 
 # Choose threshold by hand giving a good variance bias trade-off
-if (month == 1){th <- 1.2e4; points_month <- 8*31}
-if (month == 2){th <- 1.2e4; points_month <- 8*28}
+if (month == 1){th <- 1.3e3; points_month <- 8*31}
+if (month == 2){th <- 2e3; points_month <- 8*28}
 if (month == 3){th <- 1.2e4; points_month <- 8*31}
 if (month == 4){psd = c(2900,0.4,0.3)}
 if (month == 5){psd = c(2900,0.4,0.3)}
@@ -332,7 +332,7 @@ if (month == 10){psd = c(1200,0.4,0.5)}
 if (month == 11){psd = c(1200,0.4,0.4)}
 if (month == 12){psd = c(400,0.4,0.5)}
 
-fit<-fpot(prod,threshold=th,npp=points_month)
+fit<-fpot(mon,model="gpd",threshold=th,npp=points_month)
 par(mfrow=c(2,2))
 plot(fit)
 
@@ -344,7 +344,7 @@ par(mfrow=c(1,2))
 plot(profile(fit))
 abline(v=0,col=2,lty=2)
 # Zero shape should be considered
-fit.gum<-fpot(prod, threshold=th, npp=points_month, shape=0)
+fit.gum<-fpot(mon, threshold=th, npp=points_month, shape=0)
 # Diagnositc plot, shape zero give good results
 par(mfrow=c(2,2))
 plot(fit.gum)
@@ -359,45 +359,42 @@ print(c("std POT shape: 0 = ",stdPOT_0))
 
 ######################################################################
 #return level POT shape NON zero
-m10 <- 10*points_month
+m50 <- 50*points_month
 m100 <- 100*points_month
-rl10pot <- th + fit$est[1]/fit$est[2]*((m10*fit$pat)^(fit$est[2])-1)
+rl50pot <- th + fit$est[1]/fit$est[2]*((m50*fit$pat)^(fit$est[2])-1)
 rl100pot <- th + fit$est[1]/fit$est[2]*((m100*fit$pat)^(fit$est[2])-1)
 
-fit2<-gpd.fit(prod,threshold=th, npy=points_month)
-gpd.diag(fit2)
-
 #return level POT shape = 0
-rl10_0 <- th + fit.gum$est[1]*log((m10*fit.gum$pat))
+rl50_0 <- th + fit.gum$est[1]*log((m50*fit.gum$pat))
 rl100_0 <- th + fit.gum$est[1]*log((m100*fit.gum$pat))
 
 ###################################################################
 # Poisson process
-
-th3 <-quantile(prod,0.99)
-fit3<-pp.fit(prod,threshold=th3, npy=points_month)
+th3 <- th
+#th3 <-quantile(mon,0.99)
+fit3<-pp.fit(mon,threshold=th3, npy=points_month)
 par(mfrow=c(2,2))
 pp.diag(fit3)
 
 # compute nb obs above threshold
 n <- 0
-for (i in c(1:data_size)){
-  if (prod[i] > th3){n <- n+1}
+for (i in c(1:length(mon))){
+  if (mon[i] > th3){n <- n+1}
 }
-zeta <- n/data_size
+zeta <- n/length(mon)
 
 #return level PP shape NON zero
 scale_ <- fit3$mle[2] + (th3 - fit3$mle[1])*fit3$mle[3]
-rl10pp <- th + scale_/fit3$mle[3]*((m10*zeta)^(fit3$mle[3])-1)
-rl100pp <- th + scale_/fit3$mle[3]*((m100*zeta)^(fit3$mle[3])-1)
+rl50pp <- th3 + scale_/fit3$mle[3]*((m50*zeta)^(fit3$mle[3])-1)
+rl100pp <- th3 + scale_/fit3$mle[3]*((m100*zeta)^(fit3$mle[3])-1)
 
 print(c("Threshold POT = ",th))
 print(c("Threshold PP = ",th3))
-print(c("rl10 POT = ",rl10pot))
+print(c("rl50 POT = ",rl50pot))
 print(c("rl100 POT = ",rl100pot))
-print(c("rl10 POT shape:0 = ",rl10_0))
+print(c("rl50 POT shape:0 = ",rl50_0))
 print(c("rl100 POT shape:0 = ",rl100_0))
-print(c("rl10 PP = ",rl10pp))
+print(c("rl50 PP = ",rl50pp))
 print(c("rl100 PP = ",rl100pp))
 
 
