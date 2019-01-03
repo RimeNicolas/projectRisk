@@ -133,7 +133,7 @@ for(month in 1:12){
 #######################################################
 #MCMC
 # choose month between 1 and 12
-month <- 12
+month <- 10
 x_m = as.numeric(prod_monthly[, month])
 init <- c(5000,1000,0)
 mat = diag(c(1e8,1e5,1e5))
@@ -169,13 +169,11 @@ apply(MCMC3,2,sd)
 
 # Return level MCMC
 hist(as.numeric(MCMC3[,3]),nclass=20,prob=T,main="Histogram of xi",xlab="xi")
-u.10<-mc.quant(MCMC3,p=0.9,lh="gev")
+u.50<-mc.quant(MCMC3,p=0.98,lh="gev")
 u.100<-mc.quant(MCMC3,p=0.99,lh="gev")
-hist(u.10,nclass=20,prob=T,xlab="10-year return level")
-hist(u.100,nclass=20,prob=T,xlab="100-year return level")
-
-print(c("rl10 MCMC = ",u.10))
-print(c("rl100 MCMC = ",u.100))
+xlim_ <- range(c(0:5e4))
+hist(u.50,nclass=200,prob=T,xlab="50-year return level",xlim=xlim_)
+hist(u.100,nclass=400,prob=T,xlab="100-year return level",xlim=xlim_)
 
 ###############################################
 # r largest statistics per month
