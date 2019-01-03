@@ -2,8 +2,7 @@ install.packages("evd");install.packages("evdbayes");install.packages("coda");
 install.packages("ismev")
 library(evd);library(evdbayes);library(coda);library(ismev)
 #install.packages("reliaR");library(reliaR)
-#install.packages("extRemes");
-library(extRemes)
+#install.packages("extRemes");library(extRemes)
 
 # Install packages to simplify life
 install.packages("hydroTSM");
@@ -307,7 +306,7 @@ for (i in c(1:37)){
 print(index_)
 
 # Choose month
-mon <- feb; month <- 2
+mon <- dec; month <- 12
 
 par(mfrow=c(1,1))
 plot(mon)
@@ -319,18 +318,18 @@ par(mfrow=c(1,2))
 tcplot(mon,tlim=c(qu.min, qu.max))
 
 # Choose threshold by hand giving a good variance bias trade-off
-if (month == 1){th <- 1.3e3; points_month <- 8*31}
-if (month == 2){th <- 2e3; points_month <- 8*28}
-if (month == 3){th <- 1.2e4; points_month <- 8*31}
-if (month == 4){psd = c(2900,0.4,0.3)}
-if (month == 5){psd = c(2900,0.4,0.3)}
-if (month == 6){psd = c(2200,0.3,0.3)}
-if (month == 7){psd = c(2000,0.4,0.4)}
-if (month == 8){psd = c(1500,0.4,0.3)}
-if (month == 9){psd = c(1800,0.4,0.3)}
-if (month == 10){psd = c(1200,0.4,0.5)}
-if (month == 11){psd = c(1200,0.4,0.4)}
-if (month == 12){psd = c(400,0.4,0.5)}
+if (month == 1){th <- 1.2e3; points_month <- 8*31; extr_interval <- c(500,3000)}
+if (month == 2){th <- 4e3; points_month <- 8*28; extr_interval <- c(200,4700)}
+if (month == 3){th <- 9e3; points_month <- 8*31; extr_interval <- c(4e3,11e3)}
+if (month == 4){th <- 12e3; points_month <- 8*30; extr_interval <- c(4e3,12e3)}
+if (month == 5){th <- quantile(mon,0.9); points_month <- 8*31; extr_interval <- c(3e3,12e3)}
+if (month == 6){th <- 10e3; points_month <- 8*30; extr_interval <- c(4e3,12e3)}
+if (month == 7){th <- 12e3; points_month <- 8*31; extr_interval <- c(9e3,14e3)}
+if (month == 8){th <- 8e3; points_month <- 8*31; extr_interval <- c(6e3,12e3)}
+if (month == 9){th <- 10e3; points_month <- 8*30; extr_interval <- c(8e3,14e3)}
+if (month == 10){th <- 8e3; points_month <- 8*31; extr_interval <- c(6e3,11e3)}
+if (month == 11){th <- 5e3; points_month <- 8*30; extr_interval <- c(3e3,6e3)}
+if (month == 12){th <- 2e3; points_month <- 8*31; extr_interval <- c(1e3,2.4e3)}
 
 fit<-fpot(mon,model="gpd",threshold=th,npp=points_month)
 par(mfrow=c(2,2))
@@ -344,18 +343,24 @@ par(mfrow=c(1,2))
 plot(profile(fit))
 abline(v=0,col=2,lty=2)
 # Zero shape should be considered
-fit.gum<-fpot(mon, threshold=th, npp=points_month, shape=0)
-# Diagnositc plot, shape zero give good results
-par(mfrow=c(2,2))
-plot(fit.gum)
-estimatorsPOT_0 = fitted(fit.gum)
-stdPOT_0 = std.errors(fit.gum)
+#fit.gum<-fpot(mon, threshold=th, npp=points_month, shape=0)
+# Diagnositc plot, shape zero
+#par(mfrow=c(2,2))
+#plot(fit.gum)
+#estimatorsPOT_0 = fitted(fit.gum)
+#stdPOT_0 = std.errors(fit.gum)
 
 print(c("Threshold = ",th))
 print(c("estimators POT = ",estimatorsPOT))
 print(c("std POT = ",stdPOT))
-print(c("estimators POT shape:0 = ",estimatorsPOT_0))
-print(c("std POT shape: 0 = ",stdPOT_0))
+#print(c("estimators POT shape:0 = ",estimatorsPOT_0))
+#print(c("std POT shape: 0 = ",stdPOT_0))
+
+######################################################################
+# Extremal index 
+par(mfrow=c(1,1))
+exiplot(jan, tlim=extr_interval)
+exiplot(jan, tlim=extr_interval, r=0, add=T, lty=2)
 
 ######################################################################
 #return level POT shape NON zero
@@ -365,13 +370,13 @@ rl50pot <- th + fit$est[1]/fit$est[2]*((m50*fit$pat)^(fit$est[2])-1)
 rl100pot <- th + fit$est[1]/fit$est[2]*((m100*fit$pat)^(fit$est[2])-1)
 
 #return level POT shape = 0
-rl50_0 <- th + fit.gum$est[1]*log((m50*fit.gum$pat))
-rl100_0 <- th + fit.gum$est[1]*log((m100*fit.gum$pat))
+#rl50_0 <- th + fit.gum$est[1]*log((m50*fit.gum$pat))
+#rl100_0 <- th + fit.gum$est[1]*log((m100*fit.gum$pat))
 
 ###################################################################
 # Poisson process
 th3 <- th
-#th3 <-quantile(mon,0.99)
+#th3 <-quantile(mon,0.97)
 fit3<-pp.fit(mon,threshold=th3, npy=points_month)
 par(mfrow=c(2,2))
 pp.diag(fit3)
@@ -392,11 +397,17 @@ print(c("Threshold POT = ",th))
 print(c("Threshold PP = ",th3))
 print(c("rl50 POT = ",rl50pot))
 print(c("rl100 POT = ",rl100pot))
-print(c("rl50 POT shape:0 = ",rl50_0))
-print(c("rl100 POT shape:0 = ",rl100_0))
+#print(c("rl50 POT shape:0 = ",rl50_0))
+#print(c("rl100 POT shape:0 = ",rl100_0))
 print(c("rl50 PP = ",rl50pp))
 print(c("rl100 PP = ",rl100pp))
 
+# Fig for report
+par(mfrow=c(2,2))
+mrlplot(mon, tlim=c(qu.min, qu.max),main=NULL)
+exiplot(jan, tlim=extr_interval)
+exiplot(jan, tlim=extr_interval, r=0, add=T, lty=2)
+tcplot(mon,tlim=c(qu.min, qu.max))
 
 ################################################################
 # Bivariate CAPE and SRH
