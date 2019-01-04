@@ -317,7 +317,10 @@ fit1
 par(mfrow=c(3,2))
 plot(fit1)
 
-#Fit with asymmetric model is singular
+fit2 <- fbvevd(cape_srh_m,model="alog")
+fit2
+par(mfrow=c(3,2))
+plot(fit2)
 
 # Other bivariate models
 fit3 <- fbvevd(cape_srh_m,model="neglog")
