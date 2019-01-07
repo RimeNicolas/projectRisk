@@ -1,1 +1,0 @@
-r largest stat per month for r > 1

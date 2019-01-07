@@ -1,0 +1,272 @@
+\section{Fit of the Generalized Extreme Value distribution (GEV)}
+In order to fit the maxima per month, three different approaches will be considered: maximum likelihood,  Bayesian techniques and $r$-order statistics. The first method consists of finding the parameters which maximize the log-likelihood function, meaning the logarithm of the GEV distribution function. The second uses Markov chains Monte Carlo (abbreviated MCMC), more precisely the Metropolis-Hastings algorithm. The last method fits the $r$ largest maximum of each block considered. m$^{-3}$
+
+\begin{table}[h]
+\begin{center}
+\begin{tabular}{l|lcccccc}\toprule
+  %\hline
+ & & Jan & Feb & Mar & Apr & May & Jun \\\midrule
+$\eta $ $[10^3]$ & max-lh & - & $2.99_{0.52}$ & $7.93_{0.76}$ &  $13.4_{1.16}$ & $16.4_{0.85}$ & $16.4_{0.83}$ \\
+{[m$^3$ s$^{-3}$]} & MCMC & $1.12_{0.24}$ & $2.71_{0.48}$ & $7.73_{0.77}$ & $13.5_{1.17}$ & $16.5_{0.92}$ & $16.7_{0.83}$  \\
+ & $r=2$ & $1.53_{0.22}$ & $3.33_{0.40}$ & $9.68_{0.66}$ & $14.4_{0.93}$ & $18.9_{0.72}$ & $16.8_{0.65}$  \\\midrule
+$\tau $ $[10^3]$ & max-lh & - & $2.89_{0.58}$ & $4.35_{0.68}$ & $5.79_{0.53}$ & $4.37_{0.45}$ & $3.62_{0.37}$ \\
+{[m$^3$ s$^{-3}$]} & MCMC & $1.37_{0.27}$ & $2.49_{0.44}$ & $4.15_{0.64}$  & $6.85_{0.91}$ & $5.36_{0.72}$ & $4.83_{0.66}$ \\
+ & $r=2$ & $1.43_{0.22}$ & $2.38_{0.35}$ & $4.01_{0.41}$ & $6.54_{0.57}$ & $4.61_{0.37}$ & $4.09_{0.38}$  \\\midrule
+$\xi $ $[10^{-1}]$ & max-lh & - & $1.64_{2.5}$ & $0.52_{1.61}$ & $-0.83_{1.06}$ & $-1.28_{0.87}$ & $-1.70_{1.12}$ \\
+ & MCMC & $5.80_{2.00}$ & $2.73_{2.03}$ & $1.30_{1.58}$ &  $-0.7_{1.30}$ & $-1.50_{1.00}$ & $-2.73_{1.26}$  \\
+ & $r=2$ & $6.09_{1.66}$ & $3.90_{1.61}$ & $0.48_{1.06}$ & $-0.92_{0.99}$ & $-2.04_{0.67}$ & $-2.08_{1.07}$  \\
+ 
+ \bottomrule
+\toprule
+  %\hline
+ & & Jul & Aug & Sep & Oct & Nov & Dec\\\midrule
+$\eta $ $[10^3]$ & max-lh & $10.2_{0.63}$ & $8.74_{0.5}$ & $9.94_{0.64}$ & $7.99_{0.46}$ & $3.67_{0.47}$ & -  \\
+{[m$^3$ s$^{-3}$]} & MCMC & $10.2_{0.67}$ & $8.98_{0.53}$ & $9.98_{0.71}$ & $7.79_{0.46}$ & $3.64_{0.49}$ & $1.20_{0.20}$  \\
+ & $r=2$ & $10.9_{0.51}$ & $10.3_{0.41}$ & $11.8_{0.53}$ & $9.02_{042}$ & $4.71_{0.40}$ & $1.67_{0.20}$  \\\midrule
+$\tau $ $[10^3]$ & max-lh & $3.18_{0.39}$ & $2.43_{0.23}$ & $3.31_{0.37}$ & $2.28_{0.40}$ & $2.45_{0.35}$ & - \\
+{[m$^3$ s$^{-3}$]} & MCMC & $3.63_{0.51}$  & $3.20_{0.46}$ & $3.91_{0.53}$ & $2.24_{0.42}$ & $2.62_{0.38}$ & $1.12_{0.23}$ \\
+ & $r=2$ & $3.28_{0.30}$ & $2.57_{0.19}$ & $3.36_{0.28}$ & $2.43_{0.23}$ & $2.42_{0.25}$ & $1.29_{0.19}$\\\midrule
+$\xi $ $[10^{-1}]$ & max-lh &  $-0.55_{1.26}$ & $-1.62_{0.90}$ & $-0.82_{1.03}$ & $0.83_{2.3}$ & $0.01_{1.49}$ & -  \\
+ & MCMC & $-0.64_{1.35}$  & $-2.43_{1.26}$ & $-0.88_{1.16}$ & $1.58_{2.18}$ & $0.33_{1.45}$ & $5.03_{1.76}$  \\
+ & $r=2$ & $-0.32_{1.15}$ & $-2.86_{0.79}$ & $-1.27_{0.81}$ & $-0.56_{1.29}$ & $0.32_{1.14}$ & $4.42_{1.31}$\\\bottomrule
+\end{tabular}
+\end{center}
+
+\vspace{-5pt}
+\caption{Table of parameters of the GEV per month, with the standard deviation in subscript.}
+\label{table_para}
+\vspace{-5pt}
+\end{table}
+
+\subsection{Maximum likelihood}
+The fitted parameters and standard deviations are presented in table \ref{table_para}. Concerning the months of January and December, the information matrix 
+\be 
+I = -\mathbb{E} \Bigg[\frac{\partial^2 l}{\partial \theta^2}\Bigg] 
+\ee 
+is singular and hence no estimates are given. The standard deviations given in table \ref{table_para} can give a symmetric confidence interval, $\theta \pm 1.96 \sigma_\theta$ for $\theta = \{\eta, \tau, \xi\}$ and $\sigma_\theta$ is the standard deviation of the parameter. In order to have a more accurate and asymmetric confidence interval, the profile log-likelihood should be considered. Here, only the month of March is shown in figure \ref{fig_March} for space saving, as an example. 
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{images/March_qplot.png}
+  %\caption{Diagnostic plots}
+  %\label{fig:sub1}
+\end{subfigure}%
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{images/March_profile.png}
+  %\caption{Profile log-likelihood and raw data}
+  %\label{fig:sub2}
+\end{subfigure}
+\vspace{-10pt}
+\caption{Diagnostic plots, profile log-likelihood and data for March}
+\label{fig_March}
+\end{figure}
+
+\noindent Diagnostic plots suggest that the model is adequate  and it indicates quite uncertainties about the upper tail. 
+Depending of the month this uncertainty varies a lot (greater uncertainty for February for instance and low uncertainty for April). For March, the profile likelihood for $\eta$ is nearly symmetric so the likelihood-based confidence interval and the normal confidence interval are similar. It is not the case for $\tau$ and $\xi$ where the profile likelihood plot is asymmetric.
+
+%- analyse the $\tau$ and $\xi$ interval for uncertainty
+%- quantile profile likelihood
+
+\subsection{Metropolis-Hastings}
+The results of the Markov chains Monte Carlo are in table \ref{table_para}. For the twelve simulations, the same initial values of the estimators are taken, as well as the same uninformative prior, which is simply a Gaussian vector with a large diagonal covariance matrix. The proposal distribution is also Gaussian, however its covariance matrix is adapted to each month in order to have an acceptance rate between 20$\%$ and 40 $\%$ for each parameters. For 5000 points generated, the 500 first are removed (the initial burn-in) and the auto-correlation function suggest a thinning of the chain by a factor 9. The same thinning is taken for all months.
+
+\subsection{$r$ - largest order statistics}
+Finding the optimal $r$ can be done by analyzing residual plots. A large $r$ takes more data points into account but can gives biased results. After a few tries, $r=2$ seems reasonable. The results are displayed on table \ref{table_para}. 
+
+\subsection{Discussion of the fitted parameters}
+The most important parameter to consider is the shape parameter $\xi$ as its sign determines the type of the distribution. If the shape is positive, zero or negative, the distribution is respectively a Frechet, Gumbel or reverse Weibull distribution. As table \ref{table_para} shows, the months between April and September have a reverse Weibull distribution and the others months follow a Frechet distribution. However, it is likely that certain months like March, April, July, September, October and November follow a Gumbel distribution as their shape parameter is not so distant from zero and furthermore zero is their $95\%$ confidence interval. The reverse Weibull distribution has a maximum point, meaning that following this model, PROD has a maximum value for the months between April and September given by $\eta - \tau/\xi$. The location parameter $\eta$ increases over the first six months of the year and then decreases over the last six months. In general, the method of maximum likelihood and MCMC give similar results. MCMC allows to compute parameters for January and December, when the maximum likelihood method failed due to a singular information matrix. Concerning the $r$-order statistics, the values for $r=2$ seem to be appropriate. 
+
+\section{Time, ENSO dependence}
+The location parameter of the GEV distribution is maybe dependent on time or ENSO. The null hypothesis can be written ``\textit{PROD is independent of time and ENSO}''. The new hypotheses are $i)$ ``\textit{PROD is dependent of time}'' and $ii)$  ``\textit{PROD is dependent of ENSO}''. Rejection of the null hypothesis can be measured with a ratio likelihood test: $LRT =$ deviance(simple model) - deviance(complex model). A smaller deviance signify a better fit. Asymptotically, this test ratio statistics is distributed as a chi-squared random variable with one degree of freedom. The $p$-value is equal to $\mathbb{P} (X \geq  LRT)$ where $X$ follow a chi-squared distribution with one degree of freedom. For every month, the $p$-value is high, so it is likely that we can reduce the time or ENSO dependent model to a simpler model, meaning that it is more likely that the null hypothesis is true. Exception is June and August for the dependence with ENSO which give $p$-values of 0.047 and 0.040 respectively. However as it would be physically impossible that PROD and ENSO are dependent only for these two months, it is more accurate to not reject the null hypothesis. A second test of the extremal dependance of PROD and ENSO is to compute the correlation of each month. The maximum correlation is 0.237 for August and the minimum is -0.266 for May. Hence PROD and ENSO are weakly correlated for each month. 
+
+\section{Temporal clustering and return levels}
+In the last section, the extreme values were considered by blocks. Namely for each month, only one maximum per year was taken into account, giving 37 points. The approach of clustering allows to consider extreme values over a threshold, giving more points for analysis. Two different methods are used, fit the General Pareto distribution (GPD) and the point process. For each month a different threshold is used, reported on table \ref{table_pp}. The threshold was chosen after analyzing the mean residual life plot and parameters stability plots, shown on figure \ref{fig_Nov} for November. Finding an appropriate threshold is important to ensure a good trade-off between bias and variance. Indeed, a low threshold takes more points into account but the estimated shape and scale have more bias. On the other hand, the variance of the estimated parameters can be large if a high threshold is chosen. 
+
+\begin{table}[h]
+\begin{center}
+\begin{tabular}{l|lcccccc}\toprule
+  %\hline
+ &  & Jan & Feb & Mar & Apr & May & Jun \\\midrule
+threshold $[10^3]$ &         &  $1.2$ & $4.0$ & $9.0$ & $12$ & $7.5$ & $10$ \\\midrule
+$\theta$ &         &  $0.5$ & $0.5$ & $0.6$ & $0.7$ & $0.6$ & $0.7$ \\\midrule
+rl 50 $[10^4]$ & pp & $1.55$ & $1.42$ & $2.52$ & $3.40$ & $3.22$ & -\\
+{[m$^3$ s$^{-3}$]}               & gpd & $1.35$ & $1.42$ & $2.52$ & $3.45$ & $3.33$ & $3.00$ \\
+             & MCMC & $1.3$ & $1.4$ & $2.5$ & $3.4$ & $3.1$ & $2.7$  \\\midrule
+rl 100 $[10^4]$ & pp  & $2.02$ & $1.59$ & $2.80$ & $3.64$ & $3.41$ & -  \\
+{[m$^3$ s$^{-3}$]}               & gpd & $1.61$ & $1.59$ & $2.79$ & $3.73$ & $3.56$ & $3.17$ \\
+             & MCMC & $1.9$ & $1.6$ & $2.8$ & $3.7$ & $3.3$ & $2.8$  \\
+\bottomrule
+\toprule
+  %\hline
+ &  & Jul & Aug & Sep & Oct & Nov & Dec\\\midrule
+ threshold $[10^3]$ &         &  $12$ & $8$ & $10$ & $8$ & $5$ & $2$ \\\midrule
+$\theta$ & & $0.9$ & $0.8$ & $0.9$ & $0.7$ & $0.6$ & $0.5$\\\midrule
+rl 50 $[10^4]$ & pp & - & - & $2.18$ & $1.53$ & $1.28$ & -\\
+{[m$^3$ s$^{-3}$]}               & gpd & $2.08$ & $1.71$ & $2.19$ & $1.54$ & $1.29$ & $1.07$ \\
+              & MCMC & $2.1$ & $1.7$ & $2.1$ & $1.7$ & $1.2$ & $1.1$  \\\midrule
+rl 100 $[10^4]$ & pp  & - & - & $2.29$ & $1.59$ & $1.34$ & -\\
+{[m$^3$ s$^{-3}$]}                 & gpd & $2.17$ & $1.78$ & $2.33$ & $1.65$ & $1.39$ & $1.24$ \\
+              & MCMC & $2.5$ & $1.7$ & $2.6$ & $1.8$ & $1.5$ & $1.4$  \\
+ 
+ \bottomrule
+\end{tabular}
+\end{center}
+
+\vspace{-5pt}
+\caption{table of threshold, extremal index and 50, 100 years return level, per month}
+\label{table_pp}
+\vspace{-5pt}
+\end{table}
+
+\noindent Estimations of the extremal index is shown on table \ref{table_pp}. The average cluster size are given by $1/\theta$. A unit extremal index indicates independence between the points and conversely a zero extremal index indicates dependence of all points. For PROD, the extremal indices are situated in the interval $[0.5, 0.7]$. Table \ref{table_pp} also displays the return level of 50 and 100 years, calculated with the point process, by fitting the GDP and using the Metropolis-Hastings algorithm. Some values are missing because of numerical instabilities. The values for MCMC are less precise (estimation from histograms) but are in general close to the return levels computed using the two other methods.
+
+\begin{figure}
+\centering
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{images/gpd.png}
+  %\caption{Diagnostic plots}
+\end{subfigure}%
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{images/diag_gpd.png}
+  %\caption{Profile log-likelihood and raw data}
+\end{subfigure}
+\vspace{-10pt}
+\caption{Mean residual life plot, extremal index plot, parameters stability plot on the left, Diagnostic plots on the right, for November}
+\label{fig_Nov}
+\end{figure}
+
+\section{Annual Maxima analysis}
+
+Instead of considering monthly maxima over 37 years, that is, the monthly behaviour of the thunderstorms, an analysis of the annual maxima could be useful to expose the global trend of the extreme values over the years. A PROD maximum over one month is not necessary representative of a severe thunderstorm. Indeed major thunderstorms correspond to very high PROD value but over the year it depends on the season. For instance severe thunderstorms are rare in winter compare to spring. Annual maxima deal purely with the extremes thunderstorms. However, as shown on table \ref{table_para}, the parameters of the GEV distribution vary from month to month. Hence fitting the annual maxima does not give accurate prediction for a specific month, it only gives estimates for yearly extreme event without specifying in which month it is more likely to happen. The estimates and standard deviations of the fitted GEV using maximum likelihood can be found in table \ref{table_para_year} and the diagnostic plots and profile log-likelihoods are shown on figure \ref{diag_plot_year}.
+
+%The two approaches considered to fit the GEV are the maximum likelihood (maximize the log-likelihood function) and a Bayesian techniques (Markov Chains Monte Carlo).
+
+\begin{table}[h]
+\begin{center}
+\begin{tabular}{lcc}\toprule
+ & max-lh & MCMC \\\midrule
+$\eta $ {[m$^3$ s$^{-3}$]}  $[10^3]$ & $21.0_{0.71}$ &  $21.1_{0.83}$ \\
+$\tau $ {[m$^3$ s$^{-3}$]} $[10^3]$ & $3.74_{0.43}$ &  $4.23_{0.53}$ \\
+$\xi $ $[10^{-1}]$  & $-0.58_{0.99}$  & $-0.35_{0.12}$\\
+\bottomrule
+\end{tabular}
+\end{center}
+\vspace{-5pt}
+\caption{Table of parameters of the GEV for annual maxima, with the standard deviation in subscript. Estimated using maximum likelihood on the left, using Bayesian technique (MCMC) on the right.}
+\label{table_para_year}
+\vspace{-5pt}
+\end{table}
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{images/annual_gev_mle.png}
+  %\caption{Diagnostic plots}
+  %\label{fig:sub1}
+\end{subfigure}%
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{images/annual_gev_prof_log_mle.png}
+  %\caption{Profile log-likelihood and raw data}
+  %\label{fig:sub2}
+\end{subfigure}
+\vspace{-10pt}
+\caption{Diagnostic plots, profile log-likelihood and data for the annual maxima}
+\label{diag_plot_year}
+\end{figure}
+
+
+
+\section{Asymptotically dependence and bivariate models}
+
+The figure \ref{fig_asym_dep} shows the monthly maxima of CAPE and SRH and their asymptotic independence. Indeed, $\chi$ is estimated as smaller or close to zero and $\bar \chi$ is not close to the unity. Diagnostic plots of the logistic and the negative logistic models are shown on figure \ref{fig_biv}, all monthly maxima are considered together. The dependence (Pickands) function indicates that the two data sets are independent The other models do not fit and the AIC is 966.97 and 966.46 for the logistic and negative logistic models respectively, indicating that the negative logistic model is slightly better. To simplify the dependence analysis all monthly maxima were considered together. Indeed, it is very unlikely that the two data sets are dependent only for certain months. The bivariate analysis of each month separately was also done, indicating strong independence for each month.
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{images/cape.png}
+  %\caption{Diagnostic plots}
+  %\label{fig:sub1}
+\end{subfigure}%
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{images/chi_plot.png}
+  %\caption{Profile log-likelihood and raw data}
+  %\label{fig:sub2}
+\end{subfigure}
+\vspace{-10pt}
+\caption{CAPE and SRH monthly maxima on the left, $\chi$ and $\bar \chi$ plots on the right, showing asymptotic independence.}
+\label{fig_asym_dep}
+\end{figure}
+
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{images/bivar_model_log.png}
+  %\caption{Diagnostic plots}
+  %\label{fig:sub1}
+\end{subfigure}%
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{images/bivar_model_neglog.png}
+  %\caption{Profile log-likelihood and raw data}
+  %\label{fig:sub2}
+\end{subfigure}
+\vspace{-10pt}
+\caption{Diagnostic plots for the logistic and the negative logistic models}
+\label{fig_biv}
+\end{figure}
+
+\section{Analysis of the logarithm of the data points}
+Taking the logarithm of PROD maxima change the type of the GEV. Indeed, for all months were it was possible to fit, namely from February to October, the shape parameter is negative. Hence every distribution of monthly maxima with each months considered separately is a reverse Weibull, meaning that a supremum exists probably for all months. Figure \ref{log_march} displays the diagnostic plots and the profile log-likelihoods of the month of March where the logarithm of the points was taken, to make it comparable with figure \ref{fig_March}.
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{images/log_march_diag.png}
+  %\caption{Diagnostic plots}
+  %\label{fig:sub1}
+\end{subfigure}%
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{images/log_march_2.png}
+  %\caption{Profile log-likelihood and raw data}
+  %\label{fig:sub2}
+\end{subfigure}
+\vspace{-10pt}
+\caption{Diagnostic plots, profile log-likelihood and data for March, where the logarithm of the data points was taken.}
+\label{log_march}
+\end{figure}
+
+\section{Conclusion}
+The extremal analysis of PROD revealed that the fit of the GEV using maximum-likelihood, Bayesian methods or $r$-order statistics gives reasonable results, according to the diagnostic plots and the profile plots. The distribution is reversed Weibull for the months of April to September and Fréchet for the others, indicating a change in the extremal types twice a year. It was shown that it is unlikely that PROD is dependent of time or of ENSO. Furthermore it is unlikely that CAPE and SRH are dependent and they are asymptotically independent, therefore it is likely that CAPE and SRH are also independent of ENSO. The computation of the 50 and 100 years return levels was made by two different approaches giving similar results. The annual maxima approaches is useful if one wishes to quantify annual risk, however it does not give take into account that some values are more extreme at some specific months like in Spring. If time permits, it would be interesting to apply a better approach to find the optimal $r$ for the $r$-order statistics like proposed in \cite{bader2017automated}.
+
+
+\begin{comment}
+\newpage
+\begin{longtable}{|c|c|c|} 
+\hline
+Estimators & Estimates & Standard Error \endhead
+\hline
+$\hat{\eta}$ (location) & 21009.0845714166 &  710.48443907581  \\
+\hline
+$\hat{\tau}$ (scale) & 3743.80241336237 & 436.705812386718 \\
+\hline
+$\hat{\xi}$ (shape) & -0.0578186731564429 & 0.0993781260664363\\
+\hline
+\caption{table of annual parameters fitted by MLE approach}
+\label{table_annual_mle}
+\end{longtable}
+
+Tale \ref{table_annual_mle} present the fitted parameters by maximizing the log-likelihood function.
+\end{comment}

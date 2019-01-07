@@ -31,20 +31,21 @@ plot(td, prod_day)
 #Separate by month
 prod_monthly <- matrix(prod_m, ncol=12, byrow=TRUE)
 
+par(mfrow=c(1,1))
 # Convert zoo to numeric
 x_day <- as.numeric(prod_day)
 x_monthly <- as.numeric(prod_monthly)
 # Plot the monthly maximum
 x_monthly_max <- t(prod_monthly)
-matplot(x_monthly_max, lty = 1:12, pch = "o", lend = par("cex"), type="p", col="black")
-plot(x_monthly)
+matplot(x_monthly_max, lty = 1:12, pch = "o", lend = par("cex"), type="p", col="black",xlab='month nb',ylab='PROD maximum')
+plot(x_monthly,xlab='month',ylab='PROD maximum')
 # enso monthly
-# plot(enso)
+plot(enso,xlab='month',ylab='ENSO values')
 enso_monthly_max <- t(matrix(enso, ncol=12, byrow=TRUE))
-matplot(enso_monthly_max, lty = 1:12, pch = "o", lend = par("cex"), type="p", col="black")
+matplot(enso_monthly_max, lty = 1:12, pch = "o", lend = par("cex"), type="p", col="black",xlab='month nb',ylab='ENSO values')
 # Plot Prod monthly accroding to enso_monthly
 enso_monthly <- matrix(enso, ncol=12, byrow=TRUE)
-matplot( enso_monthly, prod_monthly, pch = "o", lend = par("cex"), type="p", col="black")
+matplot( enso_monthly, prod_monthly, pch = "o", lend = par("cex"), type="p", col="black",xlab='ENSO values',ylab='PROD max per month')
 
 for(month in 2:11){
   print(c("SIM NB = ",month))
@@ -62,9 +63,9 @@ for(month in 2:11){
   plot(profile(fit_gev))
 }
 
-## For March only, graphs used in the report
+## For 1 month only, graphs used in the report
 years_vec <- c(1979:2015)
-x_month = as.numeric(prod_monthly[, 3])
+x_month = as.numeric(prod_monthly[, 11])
 
 fit_gev = fgev(x_month)
 parameters = fitted(fit_gev) #estimation of the parameters
@@ -78,7 +79,7 @@ plot(fit_gev)
 # Plot profile log likelihood for a better (asymmetric) std approximate
 plot(profile(fit_gev))
 plot(years_vec,x_month, xlab='Years', ylab='Max')
-title(main = 'Raw data March')
+title(main = 'Raw data November')
 ##
 
 ########################################################################
@@ -175,7 +176,7 @@ hist(u.100,nclass=400,prob=T,xlab="100-year return level",xlim=xlim_)
 
 ###############################################
 # r largest statistics per month
-r_ <- 1
+r_ <- 2
 jan <- matrix(nrow = years, ncol = r_)
 feb <- matrix(nrow = years, ncol = r_)
 mar <- matrix(nrow = years, ncol = r_)
@@ -231,13 +232,17 @@ for (i in c(1:37)){
 print(index_)
 
 # Plot months
-mon <- feb
+mon <- dec
 par(mfrow=c(1,1))
 time_ <- rep(1:years,each=r_)
 plot(time_,t(mon))
 
 # Fit r-largest stat 
-fit0<-rlarg.fit(mon) # constant
+fit0<-rlarg.fit(mon) 
+
+# constant
+
+
 fit1<-rlarg.fit(mon,ydat=matrix(time_,ncol=r_),mul=c(1)) # linear
 
 fit0$mle
@@ -403,6 +408,85 @@ mrlplot(mon, tlim=c(qu.min, qu.max),main=NULL)
 exiplot(jan, tlim=extr_interval)
 exiplot(jan, tlim=extr_interval, r=0, add=T, lty=2)
 tcplot(mon,tlim=c(qu.min, qu.max))
+################################################################
+# Annual estimates
+# Define variables
+ppd <- 8 #point per day
+years <- 37
+months <- 12
+data_size <- ppd*365*years #length(cape)
+# Max of 8 points per day to 1 point per day and add date sequence 
+td <- seq(as.Date("1979/01/01"), as.Date("2015/12/31"), "days")
+td <- td[!grepl(x = td, pattern = "-02-29$")]
+prod_day <- apply(matrix(prod,ncol=ppd,byrow=TRUE),1,max)
+prod_day <- zoo(x = prod_day, order.by = td)
+# Daily to monthly data taking max per month
+tm <- seq(from=as.Date("1979/01/01"), to=as.Date("2015/12/01"), by = "month")
+tm <- tm[!grepl(x = tm, pattern = "-02-29$")]
+prod_month <- daily2monthly(prod_day, FUN=max, na.rm=TRUE) #prod max per month
+length(prod_month)
+# Daily to monthly data taking max per month
+ta <- seq(from=as.Date("1979/01/01"), to=as.Date("2015/01/01"), "years")
+#ta <- tm[!grepl(x = tm, pattern = "-02-29$")]
+prod_annual <- monthly2annual(prod_month, FUN=max, na.rm=TRUE) #prod max per month
+length(prod_annual)
+# Plot daily/monthly maximum
+plot(td, prod_day)
+plot(tm, prod_month)
+plot(ta, prod_annual, main="Annual raw data")
+
+# Annual ENSO maxima:
+enso_annual <- apply(matrix(enso,ncol=months,byrow=TRUE),1,max)
+enso_annual <- zoo(x = enso_annual, order.by = ta)
+plot(ta, enso_annual)
+plot(enso_annual, prod_annual)
+
+#print(c("SIM NB = ",month))
+par(mfrow=c(1,1))
+fit_gev = fgev(prod_annual)
+#estimation of the parameters
+parameters = fitted(fit_gev) 
+print(c("parameters = ",parameters))
+#std of the parameters (normal dist.)
+std = std.errors(fit_gev)
+print(c("standard error = ",std))
+par(mfrow=c(2,2))
+plot(fit_gev)
+
+par(mfrow=c(2,2))
+plot(fit_gev)
+dev.off()
+# Plot profile log likelihood for a better (asymmetric) std approximate
+prof_log <- profile(fit_gev)
+plot(prof_log)
+plot(ta, prod_annual, main="Annual raw data")
+
+Years <- ta
+par(mfrow=c(2,2))
+plot(prof_log)
+plot(Years, prod_annual, main="Annual raw data")
+dev.off()
+
+#MCMC
+init <- c(5000,1000,0)
+mat = diag(c(1e11,1e8,1e8))
+#mat = diag(c(1e8,1e5,1e5))
+pn = prior.norm(mean=c(0,0,0),cov=mat) # normal distribution
+psd = c(800,0.10,0.12) # sd for proposal dist (normal dist)
+# initial value, prior distribution: normal, likelihood: gev, psd: 
+#post = posterior(5000,init=init,prior=pn,lh="gev",data=x_monthly,psd=psd)
+post = posterior(5000,init=init,prior=pn,lh="gev",data=prod_annual,psd=psd)
+#mc = mcmc(post[-c(1:300),])
+mc = mcmc(post)
+plot(mc)
+attr(mc,"ar")
+#V2 params
+MCMC2<-mcmc(post[-c(1:500),])
+acf(MCMC2)
+MCMC3<-mcmc(post[500 + 9*c(1:500),])
+acf(MCMC3)
+apply(MCMC3,2,mean)
+apply(MCMC3,2,sd)
 
 ################################################################
 # Bivariate CAPE and SRH
@@ -426,8 +510,8 @@ srh_m <- as.numeric(srh_m)
 
 # Plot CAPE and SRH
 par(mfrow=c(1,2))
-plot(cape_m)
-plot(srh_m)
+plot(cape_m,xlab='month',ylab='CAPE values')
+plot(srh_m,xlab='month',ylab='SRH values')
 
 # Fit with symmetric model
 fit.mar1 <- fgev(x=cape_m)
@@ -467,7 +551,7 @@ cape_monthly <- matrix(cape_m, ncol=12, byrow=TRUE)
 srh_monthly <- matrix(srh_m, ncol=12, byrow=TRUE)
 
 # month number
-month <- 2
+month <- 1
 cape_month <- as.numeric(cape_monthly[, month])
 srh_month <- as.numeric(srh_monthly[, month])
 
@@ -502,7 +586,8 @@ fit3 <- fbvevd(cape_srh_month,model="neglog")
 par(mfrow=c(3,2))
 plot(fit3)
 #fit4 <- fbvevd(cape_srh_month,model="bilog") #singular
-fit5 <- fbvevd(cape_srh_month,model="ct")    #singular
+fit5 <- fbvevd(cape_srh_month,model="ct")  
+plot(fit5)
 #fit6 <- fbvevd(cape_srh_month,model="negbilog") #singular
 
 # AIC
@@ -511,13 +596,18 @@ aic2 <- fit2$dev + 2*length(fit2$param)
 aic3 <- fit3$dev + 2*length(fit3$param)
 aic5 <- fit5$dev + 2*length(fit5$param)
 
+aic1
+aic2
+aic3
+aic5
+
 # Asymptotic dependence
 par(mfrow=c(1,2))
 chiplot(cape_srh_month, xlim=c(0.5,1))
 
 ########################################################################################
 # log PROD
-for(month in 2:11){
+for(month in 2:10){
   print(c("SIM NB = ",month))
   x_month = as.numeric(log(prod_monthly[, month]))
   par(mfrow=c(1,1))
@@ -533,5 +623,57 @@ for(month in 2:11){
   plot(profile(fit_gev))
 }
 
+## For March only, graphs used in the report
+years_vec <- c(1979:2015)
+x_month = as.numeric(log(prod_monthly[, 3]))
 
+fit_gev = fgev(x_month)
+parameters = fitted(fit_gev) #estimation of the parameters
+print(c("parameters = ",parameters))
+std = std.errors(fit_gev) #std of the parameters (normal dist.)
+print(c("std = ",std))
+
+par(mfrow=c(2,2))
+plot(fit_gev)
+
+# Plot profile log likelihood for a better (asymmetric) std approximate
+plot(profile(fit_gev))
+plot(years_vec,x_month, xlab='Years', ylab='log(Max)')
+title(main = 'Raw data March')
+##
+
+# Bivariate log (not working)
+# Fit with symmetric model
+cape_log <- log(cape_m)
+srh_log <- log(srh_m)
+fit.mar1 <- fgev(x=cape_log)
+fit.mar2 <- fgev(x=srh_log)
+res1 <- qgev(pgev(cape_log, loc=fit.mar1$param['loc'],
+                  scale=fit.mar1$param['scale'], shape=fit.mar1$param['shape']),1,1,1)
+res2 <- qgev(pgev(srh_log, loc=fit.mar2$param['loc'],
+                  scale=fit.mar2$param['scale'], shape=fit.mar2$param['shape']),1,1,1)
+fbvevd(cbind(res1,res2), cscale=TRUE, cshape=TRUE, cloc=TRUE,
+       loc1=1, scale1=1, shape1=1)
+
+cape_srh_log <- cbind(cape_log,srh_log)
+fit1 <- fbvevd(cape_srh_log,model="log")
+fit1
+par(mfrow=c(3,2))
+plot(fit1)
+
+# Other bivariate models
+fit3 <- fbvevd(cape_srh_log,model="neglog")
+par(mfrow=c(3,2))
+plot(fit3)
+#fit4 <- fbvevd(cape_srh_m,model="bilog") #singular
+#fit5 <- fbvevd(cape_srh_m,model="ct")    #singular
+#fit6 <- fbvevd(cape_srh_m,model="negbilog") #singular
+
+# AIC
+aic1 <- fit1$dev + 2*length(fit1$param)
+aic3 <- fit3$dev + 2*length(fit3$param)
+
+# Asymptotic dependence
+par(mfrow=c(1,2))
+chiplot(cape_srh_log, xlim=c(0.8,1))
 
